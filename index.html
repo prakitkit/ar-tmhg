@@ -666,6 +666,71 @@ function renderFloorMap(f) {
   svg.querySelectorAll('.room[data-id]').forEach(g => {
     g.addEventListener('click', () => { selectDest(g.dataset.id); showRoom(g.dataset.id); });
   });
+  // re-place pin if a dest is already selected on this floor
+  if (destRoom) placePin(destRoom.id);
+}
+
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+function placePin(id) {
+  const svg = document.getElementById('floor-svg');
+  // remove old pin
+  const old = document.getElementById('map-pin');
+  if (old) old.remove();
+  if (!id || !svg) return;
+
+  const g = svg.querySelector(`[data-id="${id}"]`);
+  if (!g) return;
+  const rect = g.querySelector('rect');
+  if (!rect) return;
+
+  const rx = parseFloat(rect.getAttribute('x'));
+  const ry = parseFloat(rect.getAttribute('y'));
+  const rw = parseFloat(rect.getAttribute('width'));
+  const rh = parseFloat(rect.getAttribute('height'));
+  const cx = rx + rw / 2;
+  const cy = ry + rh / 2;
+
+  const pin = document.createElementNS(SVG_NS, 'g');
+  pin.id = 'map-pin';
+  // pulse ring
+  const pulse = document.createElementNS(SVG_NS, 'circle');
+  pulse.setAttribute('cx', cx); pulse.setAttribute('cy', cy); pulse.setAttribute('r', 12);
+  pulse.setAttribute('fill', 'rgba(0,255,231,0.18)'); pulse.setAttribute('stroke', '#00ffe7');
+  pulse.setAttribute('stroke-width', '1.5');
+  const animR = document.createElementNS(SVG_NS, 'animate');
+  animR.setAttribute('attributeName', 'r'); animR.setAttribute('values', '10;18;10');
+  animR.setAttribute('dur', '1.4s'); animR.setAttribute('repeatCount', 'indefinite');
+  const animO = document.createElementNS(SVG_NS, 'animate');
+  animO.setAttribute('attributeName', 'opacity'); animO.setAttribute('values', '0.9;0.2;0.9');
+  animO.setAttribute('dur', '1.4s'); animO.setAttribute('repeatCount', 'indefinite');
+  pulse.appendChild(animR); pulse.appendChild(animO);
+  // dot center
+  const dot = document.createElementNS(SVG_NS, 'circle');
+  dot.setAttribute('cx', cx); dot.setAttribute('cy', cy); dot.setAttribute('r', 5);
+  dot.setAttribute('fill', '#00ffe7');
+  // pin stem
+  const stem = document.createElementNS(SVG_NS, 'line');
+  stem.setAttribute('x1', cx); stem.setAttribute('y1', cy - 5);
+  stem.setAttribute('x2', cx); stem.setAttribute('y2', cy - 18);
+  stem.setAttribute('stroke', '#00ffe7'); stem.setAttribute('stroke-width', '2');
+  // pin head
+  const head = document.createElementNS(SVG_NS, 'circle');
+  head.setAttribute('cx', cx); head.setAttribute('cy', cy - 22); head.setAttribute('r', 6);
+  head.setAttribute('fill', '#00ffe7');
+  // pin label
+  const room = findRoom(id);
+  if (room) {
+    const lbl = document.createElementNS(SVG_NS, 'text');
+    lbl.setAttribute('x', cx); lbl.setAttribute('y', cy - 22);
+    lbl.setAttribute('text-anchor', 'middle'); lbl.setAttribute('dominant-baseline', 'central');
+    lbl.setAttribute('font-size', '7'); lbl.setAttribute('fill', '#0a0e1a');
+    lbl.setAttribute('font-weight', '700'); lbl.textContent = room.icon;
+    pin.appendChild(pulse); pin.appendChild(stem); pin.appendChild(head); pin.appendChild(dot); pin.appendChild(lbl);
+  } else {
+    pin.appendChild(pulse); pin.appendChild(stem); pin.appendChild(head); pin.appendChild(dot);
+  }
+  svg.appendChild(pin);
 }
 
 function renderRoomList(f) {
@@ -809,10 +874,10 @@ function selectDest(id){
   document.querySelectorAll('.room').forEach(r=>r.classList.remove('selected'));
   const el=document.querySelector(`[data-id="${id}"]`);
   if(el) el.classList.add('selected');
-  const bar=document.getElementById('dest-bar');
   document.getElementById('dest-room-icon').textContent=c.icon;
   document.getElementById('dest-room-name').textContent=c.name;
-  bar.classList.remove('hidden');
+  document.getElementById('dest-bar').classList.remove('hidden');
+  placePin(id);
   updateDestDist();
 }
 
@@ -826,6 +891,7 @@ function cancelDest(){
   destRoom=null;
   document.querySelectorAll('.room').forEach(r=>r.classList.remove('selected'));
   document.getElementById('dest-bar').classList.add('hidden');
+  placePin(null);
 }
 
 // ── FLOOR 8 COORDS ──
