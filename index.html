@@ -89,6 +89,39 @@ a-scene{width:100%!important;height:100%!important;}
 .qcard{background:#fff;border-radius:11px;padding:12px 8px 8px;display:flex;flex-direction:column;align-items:center;gap:5px;}
 .qname{font-size:10px;font-weight:700;text-align:center;color:#111;}
 .qfl{font-size:9px;color:#666;}
+/* NAV OVERLAY */
+#nav-overlay{display:none;position:fixed;inset:0;z-index:90;background:#000;}
+#nav-overlay.active{display:block;}
+#nav-cam{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+#nav-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
+#nav-close{position:absolute;top:16px;right:16px;background:rgba(10,14,26,0.8);border:1px solid rgba(255,255,255,0.2);border-radius:50%;width:42px;height:42px;color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+#nav-info{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,rgba(10,14,26,0.97),transparent);padding:20px 16px 40px;display:flex;flex-direction:column;align-items:center;gap:6px;}
+#nav-room{font-size:16px;font-weight:700;color:#fff;}
+#nav-dist{font-size:36px;font-weight:700;color:#00ffe7;}
+#nav-hint{font-size:12px;color:rgba(255,255,255,0.4);}
+/* dest-bar nav button */
+#nav-start-btn{background:#00ffe7;color:#0a0e1a;border:none;border-radius:20px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;}
+/* CALIBRATION */
+#cal-panel{display:none;position:fixed;inset:0;z-index:80;background:rgba(10,14,26,0.99);flex-direction:column;align-items:center;justify-content:flex-start;gap:12px;padding:32px 24px 40px;text-align:center;overflow-y:auto;}
+#cal-panel.open{display:flex;}
+#cal-title{font-size:17px;font-weight:700;color:#fbbf24;margin-top:8px;}
+#cal-sub{font-size:12px;color:rgba(255,255,255,0.5);line-height:1.8;max-width:300px;}
+#cal-select{width:100%;max-width:320px;padding:10px 14px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:10px;color:#fff;font-size:14px;}
+#cal-select option,#cal-select optgroup{background:#1a2a3a;}
+#cal-gps-box{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:10px 16px;font-size:12px;color:rgba(255,255,255,0.6);width:100%;max-width:320px;}
+.cal-dot{width:8px;height:8px;border-radius:50%;background:#555;flex-shrink:0;}
+.cal-dot.ready{background:#00ffe7;animation:pdot 1.5s infinite;}
+@keyframes pdot{0%,100%{opacity:1}50%{opacity:0.3}}
+#cal-save{background:#fbbf24;color:#0a0e1a;border:none;border-radius:50px;padding:13px 0;font-size:15px;font-weight:700;cursor:pointer;width:100%;max-width:320px;}
+#cal-save:disabled{opacity:0.4;cursor:not-allowed;}
+#cal-list{width:100%;max-width:320px;max-height:200px;overflow-y:auto;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:8px;}
+.cal-item{display:flex;justify-content:space-between;align-items:center;padding:6px 8px;border-bottom:1px solid rgba(255,255,255,0.05);font-size:11px;}
+.cal-item:last-child{border-bottom:none;}
+.cal-iname{color:#fff;font-weight:600;flex:1;text-align:left;}
+.cal-icoord{color:#00ffe7;font-family:monospace;font-size:10px;}
+#cal-export{background:rgba(0,255,231,0.09);border:1px solid rgba(0,255,231,0.3);border-radius:50px;padding:9px 0;color:#00ffe7;font-size:12px;cursor:pointer;width:100%;max-width:320px;}
+#cal-close-btn{background:none;border:1px solid rgba(255,255,255,0.15);border-radius:50px;padding:9px 0;color:rgba(255,255,255,0.4);font-size:13px;cursor:pointer;width:100%;max-width:320px;}
+#cal-open-btn{background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.35);border-radius:50px;padding:7px 14px;color:#fbbf24;font-size:12px;font-weight:700;cursor:pointer;}
 </style>
 </head>
 <body>
@@ -292,8 +325,9 @@ const MARKER_MAP = {
 <!-- Destination Bar -->
 <div id="dest-bar" class="hidden">
   <span id="dest-room-icon">📍</span>
-  <span id="dest-room-name">—</span>
-  <button id="dest-cancel" onclick="cancelDest()">✕ ยกเลิก</button>
+  <span id="dest-room-name" style="flex:1;font-size:13px;font-weight:700;">—</span>
+  <button id="nav-start-btn" onclick="startNav()">🧭 นำทาง</button>
+  <button id="dest-cancel" onclick="cancelDest()">✕</button>
 </div>
 
 <!-- Map Panel -->
@@ -303,7 +337,10 @@ const MARKER_MAP = {
       <div class="pt">🗺️ อาคารตระหนักจิตร</div>
       <div class="pt-sub">ภาควิชาสุขวิทยาเขตร้อน</div>
     </div>
-    <button class="cbtn" onclick="closeMap()">✕</button>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button id="cal-open-btn" onclick="openCal()">📍 บันทึกหมุด</button>
+      <button class="cbtn" onclick="closeMap()">✕</button>
+    </div>
   </div>
   <div class="ftabs">
     <button class="ftab active" onclick="switchFloor(8)" id="tab-8">ชั้น 8</button>
@@ -325,6 +362,33 @@ const MARKER_MAP = {
     พิมพ์ป้ายเหล่านี้ติดหน้าห้อง • ชี้กล้องแล้วขึ้นข้อมูลทันที
   </div>
   <div class="qgrid" id="qr-grid"></div>
+</div>
+
+<!-- AR Navigation Overlay -->
+<div id="nav-overlay">
+  <video id="nav-cam" autoplay playsinline muted></video>
+  <canvas id="nav-canvas"></canvas>
+  <button id="nav-close" onclick="stopNav()">✕</button>
+  <div id="nav-info">
+    <div id="nav-room">—</div>
+    <div id="nav-dist">—</div>
+    <div id="nav-hint">⏳ รอ GPS...</div>
+  </div>
+</div>
+
+<!-- Calibration Panel -->
+<div id="cal-panel">
+  <div id="cal-title">📍 บันทึกตำแหน่งห้อง</div>
+  <div id="cal-sub">ยืนหน้าห้องที่ต้องการ<br>เลือกชื่อห้อง แล้วกด "บันทึก"</div>
+  <select id="cal-select"><option value="">— เลือกห้อง —</option></select>
+  <div id="cal-gps-box">
+    <div class="cal-dot" id="cal-dot"></div>
+    <span id="cal-gps-txt">กำลังหา GPS...</span>
+  </div>
+  <button id="cal-save" onclick="saveCalCoord()" disabled>📍 บันทึกตำแหน่งนี้</button>
+  <div id="cal-list"></div>
+  <button id="cal-export" onclick="exportCalCoords()">📋 Copy ค่าพิกัดทั้งหมด</button>
+  <button id="cal-close-btn" onclick="closeCal()">ปิด</button>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -730,15 +794,7 @@ const ROOM_COORDS = {
   "f9-toilet-f":   { lat:13.7950, lng:100.4302, name:"ห้องน้ำ F",            icon:"🚹🚺" },
 };
 // โหลดพิกัดที่บันทึกไว้ (ถ้ามี)
-try{ const s=localStorage.getItem('tmhg_coords'); if(s) Object.assign(ROOM_COORDS,JSON.parse(s)); }catch(e){}
-
 let destRoom=null, userLat=null, userLng=null;
-
-// GPS
-navigator.geolocation&&navigator.geolocation.watchPosition(
-  p=>{ userLat=p.coords.latitude; userLng=p.coords.longitude; updateDestDist(); },
-  e=>console.warn('GPS:',e), {enableHighAccuracy:true,maximumAge:2000}
-);
 
 function haversine(la1,lo1,la2,lo2){
   const R=6371000,dl=(la2-la1)*Math.PI/180,dg=(lo2-lo1)*Math.PI/180;
@@ -772,6 +828,148 @@ function cancelDest(){
   document.getElementById('dest-bar').classList.add('hidden');
 }
 
+// ── FLOOR 8 COORDS ──
+Object.assign(ROOM_COORDS,{
+  "f8-lift":      {lat:13.7954,lng:100.4300,name:"ลิฟท์",              icon:"🔼"},
+  "f8-stairs":    {lat:13.7954,lng:100.4300,name:"บันได",              icon:"🪜"},
+  "f8-maid":      {lat:13.7954,lng:100.4299,name:"ห้องพักแม่บ้าน",    icon:"🧹"},
+  "f8-faculty":   {lat:13.7954,lng:100.4299,name:"ห้องพักอาจารย์",    icon:"👨‍🏫"},
+  "f8-secretary": {lat:13.7954,lng:100.4301,name:"ห้องเลขาภาควิชา",  icon:"📋"},
+  "f8-head":      {lat:13.7954,lng:100.4302,name:"ห้องหัวหน้าภาค",   icon:"🏅"},
+  "f8-dining":    {lat:13.7953,lng:100.4300,name:"ห้องกินข้าว",       icon:"🍱"},
+  "f8-cowork":    {lat:13.7953,lng:100.4301,name:"Co-working Space 1",icon:"💻"},
+  "f8-meeting":   {lat:13.7953,lng:100.4302,name:"ห้องประชุมชั้น 8",  icon:"🏛️"},
+  "f8-fitness":   {lat:13.7953,lng:100.4302,name:"ห้องฟิตเนส",        icon:"🏋️"},
+  "f8-studio":    {lat:13.7953,lng:100.4303,name:"ห้อง Studio",       icon:"🎬"},
+});
+
+// ── CALIBRATION ──
+let calCoords={}, calGpsReady=false, calLat=null, calLng=null, calAcc=null;
+try{ const s=localStorage.getItem('tmhg_coords'); if(s){calCoords=JSON.parse(s); Object.assign(ROOM_COORDS,calCoords);} }catch(e){}
+
+navigator.geolocation&&navigator.geolocation.watchPosition(
+  p=>{ calLat=p.coords.latitude; calLng=p.coords.longitude; calAcc=Math.round(p.coords.accuracy);
+    calGpsReady=true; userLat=calLat; userLng=calLng;
+    const dot=document.getElementById('cal-dot'), txt=document.getElementById('cal-gps-txt'), btn=document.getElementById('cal-save');
+    if(dot) dot.className='cal-dot ready';
+    if(txt) txt.textContent=`GPS พร้อม ±${calAcc} ม.`;
+    if(btn) btn.disabled=false;
+    updateDestDist();
+  },
+  ()=>{ const t=document.getElementById('cal-gps-txt'); if(t) t.textContent='ไม่พบ GPS — เปิด Location'; },
+  {enableHighAccuracy:true,maximumAge:1000}
+);
+
+function buildCalSelect(){
+  const sel=document.getElementById('cal-select'); if(!sel) return;
+  sel.innerHTML='<option value="">— เลือกห้อง —</option>';
+  Object.entries(BUILDING.floors).forEach(([fn,fl])=>{
+    const og=document.createElement('optgroup'); og.label=fl.label;
+    fl.rooms.forEach(r=>{ const op=document.createElement('option'); op.value=r.id; op.textContent=r.icon+' '+r.name; og.appendChild(op); });
+    sel.appendChild(og);
+  });
+}
+
+function openCal(){ buildCalSelect(); renderCalList(); document.getElementById('cal-panel').classList.add('open'); }
+function closeCal(){ document.getElementById('cal-panel').classList.remove('open'); }
+
+function saveCalCoord(){
+  const id=document.getElementById('cal-select').value;
+  if(!id){alert('กรุณาเลือกห้องก่อน');return;}
+  if(!calGpsReady){alert('GPS ยังไม่พร้อม');return;}
+  const base=ROOM_COORDS[id]||{};
+  calCoords[id]={...base,lat:calLat,lng:calLng,acc:calAcc,ts:new Date().toLocaleTimeString('th-TH')};
+  Object.assign(ROOM_COORDS,calCoords);
+  try{localStorage.setItem('tmhg_coords',JSON.stringify(calCoords));}catch(e){}
+  renderCalList();
+  document.getElementById('cal-select').value='';
+  const btn=document.getElementById('cal-save'),orig=btn.textContent;
+  btn.textContent='✅ บันทึกแล้ว!'; setTimeout(()=>btn.textContent=orig,1500);
+}
+
+function renderCalList(){
+  const list=document.getElementById('cal-list'); if(!list) return;
+  const keys=Object.keys(calCoords);
+  if(!keys.length){ list.innerHTML='<div style="padding:8px;color:rgba(255,255,255,0.3);font-size:11px;text-align:center">ยังไม่มีตำแหน่งที่บันทึก</div>'; return; }
+  list.innerHTML=keys.map(id=>{ const c=calCoords[id];
+    return `<div class="cal-item"><span class="cal-iname">${c.icon||'📍'} ${c.name||id}</span><span class="cal-icoord">${c.lat.toFixed(5)},${c.lng.toFixed(5)}</span></div>`;
+  }).join('');
+}
+
+function exportCalCoords(){
+  const out=Object.entries(calCoords).map(([id,c])=>`"${id}": { lat:${c.lat}, lng:${c.lng} }, // ±${c.acc||'?'}m`).join('\n');
+  navigator.clipboard.writeText(out).then(()=>{
+    const b=document.getElementById('cal-export'); b.textContent='✅ Copy แล้ว!';
+    setTimeout(()=>b.textContent='📋 Copy ค่าพิกัดทั้งหมด',2000);
+  }).catch(()=>prompt('Copy:',out));
+}
+
+// ── COMPASS ──
+let userHeading=0;
+(function(){
+  function listen(){ window.addEventListener('deviceorientationabsolute',onO,true); window.addEventListener('deviceorientation',onO,true); }
+  function onO(e){ if(e.webkitCompassHeading!=null) userHeading=e.webkitCompassHeading; else if(e.alpha!=null) userHeading=(360-e.alpha)%360; }
+  if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){
+    DeviceOrientationEvent.requestPermission().then(s=>{ if(s==='granted') listen(); }).catch(()=>{});
+  } else listen();
+})();
+
+// ── AR NAVIGATION ──
+let navActive=false, camStream=null, navRaf=null;
+
+async function startNav(){
+  if(!destRoom){alert('กรุณาเลือกห้องปลายทางก่อน');return;}
+  navActive=true;
+  document.getElementById('nav-overlay').classList.add('active');
+  try{
+    camStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}}});
+    document.getElementById('nav-cam').srcObject=camStream;
+  }catch(e){ console.warn('Camera:',e); }
+  navRaf=requestAnimationFrame(navLoop);
+}
+
+function stopNav(){
+  navActive=false;
+  document.getElementById('nav-overlay').classList.remove('active');
+  if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}
+  if(navRaf){cancelAnimationFrame(navRaf);navRaf=null;}
+}
+
+function navLoop(){ if(!navActive) return; drawNav(); navRaf=requestAnimationFrame(navLoop); }
+
+function bearingTo(la1,lo1,la2,lo2){
+  const dg=(lo2-lo1)*Math.PI/180;
+  const y=Math.sin(dg)*Math.cos(la2*Math.PI/180);
+  const x=Math.cos(la1*Math.PI/180)*Math.sin(la2*Math.PI/180)-Math.sin(la1*Math.PI/180)*Math.cos(la2*Math.PI/180)*Math.cos(dg);
+  return(Math.atan2(y,x)*180/Math.PI+360)%360;
+}
+
+function drawNav(){
+  const canvas=document.getElementById('nav-canvas');
+  const ctx=canvas.getContext('2d');
+  canvas.width=window.innerWidth; canvas.height=window.innerHeight;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  document.getElementById('nav-room').textContent=(destRoom.icon||'📍')+' '+destRoom.name;
+  if(userLat===null){ document.getElementById('nav-hint').textContent='⏳ รอ GPS...'; return; }
+  const dist=haversine(userLat,userLng,destRoom.lat,destRoom.lng);
+  const brg=bearingTo(userLat,userLng,destRoom.lat,destRoom.lng);
+  let rel=brg-userHeading; while(rel>180)rel-=360; while(rel<-180)rel+=360;
+  document.getElementById('nav-dist').textContent=fmtDist(dist);
+  document.getElementById('nav-hint').textContent=dist<10?'🎯 ถึงแล้ว!':'📍 GPS พร้อม — หันตามลูกศร';
+  const cx=canvas.width/2, cy=canvas.height*0.4;
+  const sz=Math.min(90,canvas.width*0.22);
+  // วาดลูกศร
+  ctx.save(); ctx.translate(cx,cy); ctx.rotate(rel*Math.PI/180);
+  ctx.beginPath(); ctx.moveTo(0,-sz); ctx.lineTo(sz*.4,sz*.2); ctx.lineTo(sz*.15,sz*.2);
+  ctx.lineTo(sz*.15,sz*.65); ctx.lineTo(-sz*.15,sz*.65); ctx.lineTo(-sz*.15,sz*.2); ctx.lineTo(-sz*.4,sz*.2); ctx.closePath();
+  const g=ctx.createLinearGradient(0,-sz,0,sz*0.65);
+  g.addColorStop(0,'#00ffe7'); g.addColorStop(1,'rgba(0,255,231,0.25)');
+  ctx.fillStyle=g; ctx.shadowColor='#00ffe7'; ctx.shadowBlur=24; ctx.fill(); ctx.restore();
+  // pulse ring
+  const p=(Date.now()%1500)/1500;
+  ctx.beginPath(); ctx.arc(cx,cy,55+p*35,0,Math.PI*2);
+  ctx.strokeStyle=`rgba(0,255,231,${0.45-p*0.45})`; ctx.lineWidth=2; ctx.stroke();
+}
 </script>
 </body>
 </html>
