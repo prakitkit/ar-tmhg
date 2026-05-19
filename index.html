@@ -67,7 +67,15 @@ a-scene{width:100%!important;height:100%!important;}
 .ftab{flex:1;padding:8px;text-align:center;border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;border:1px solid rgba(0,255,231,0.2);background:transparent;color:rgba(255,255,255,0.4);}
 .ftab.active{background:rgba(0,255,231,0.1);color:var(--neon);border-color:rgba(0,255,231,0.4);}
 .fmap-wrap{background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.06);border-radius:13px;padding:10px;margin-bottom:13px;overflow:hidden;position:relative;touch-action:none;cursor:grab;}
+.fmap-wrap:active{cursor:grabbing;}
 .fmap-wrap svg{display:block;width:600px;height:auto;}.fmap-inner{transform-origin:0 0;will-change:transform;display:block;}
+.room{cursor:pointer;}.room rect{transition:filter 0.15s;}.room:hover rect{filter:brightness(1.4);}
+.room.selected rect{filter:brightness(2) drop-shadow(0 0 6px #00ffe7);}
+.lbl{font-family:'Sarabun',sans-serif;pointer-events:none;}.th{font-size:11px;font-weight:600;fill:#fff;}.ts{font-size:9px;fill:rgba(255,255,255,0.6);}
+#dest-bar{display:none;position:fixed;top:0;left:0;right:0;z-index:70;background:rgba(10,14,26,0.97);border-bottom:1px solid rgba(0,255,231,0.3);padding:10px 14px;display:flex;align-items:center;gap:10px;}
+#dest-bar.hidden{display:none!important;}
+#dest-room-name{flex:1;font-size:14px;font-weight:700;color:#fff;}
+#dest-cancel{background:none;border:1px solid rgba(255,255,255,0.2);border-radius:20px;padding:4px 12px;color:rgba(255,255,255,0.5);font-size:11px;cursor:pointer;}
 .rlist{display:flex;flex-direction:column;gap:6px;}
 .ri{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.055);border-radius:11px;padding:10px 12px;cursor:pointer;}
 .ri:active{background:rgba(0,255,231,0.06);}
@@ -207,32 +215,6 @@ const BUILDING = {
           desc:"ห้องน้ำ col④–④.3 row F ล่าง",
           tags:["ห้องน้ำ"] },
       ]
-    },
-        { id:"f9-stairs",    name:"บันได (ชั้น 9)",           icon:"🪜", color:"#a78bfa",
-          desc:"บันไดหลักเชื่อมชั้น 8–9 และชั้นอื่นๆ",
-          tags:["บันได","ฉุกเฉิน"] },
-        { id:"f9-maid",      name:"ห้องพักแม่บ้าน",           icon:"🧹", color:"#888",
-          desc:"ห้องพักและเก็บอุปกรณ์ทำความสะอาด\nติดต่อแม่บ้านประจำชั้น 9",
-          tags:["แม่บ้าน","อุปกรณ์"] },
-        { id:"f9-faculty",   name:"ห้องพักอาจารย์",           icon:"👨‍🏫", color:"#ff6b35",
-          desc:"ห้องพักและทำงานของอาจารย์ภาควิชา\nกรุณานัดหมายก่อนเข้าพบ",
-          tags:["อาจารย์","นัดหมาย"] },
-        { id:"f9-staff",     name:"ห้องเจ้าหน้าที่",          icon:"👥", color:"#fbbf24",
-          desc:"ห้องทำงานเจ้าหน้าที่และนักวิจัย\nภาควิชาสุขวิทยาเขตร้อน",
-          tags:["เจ้าหน้าที่","นักวิจัย"] },
-        { id:"f9-jkcommons", name:"ห้องประชุม JK Commons",    icon:"🎤", color:"#00ffe7",
-          desc:"ห้องประชุม JK Commons ชั้น 9\nความจุ 25–40 คน เวที ไมโครโฟน โปรเจกเตอร์\nใช้จัดสัมมนา บรรยาย ประชุมวิชาการ\nจองผ่านเลขาภาควิชา",
-          tags:["JK Commons","25–40 คน","สัมมนา","บรรยาย"] },
-        { id:"f9-cowork",    name:"Co-working Space 2",        icon:"🖥️", color:"#60a5fa",
-          desc:"พื้นที่ทำงานร่วม Co-working Space ชั้น 9\nโต๊ะทำงาน WiFi ปลั๊กไฟ เปิดตลอดเวลาทำการ",
-          tags:["Co-working","WiFi","ทำงาน"] },
-        { id:"f9-coffee",    name:"ห้องกาแฟ",                 icon:"☕", color:"#fbbf24",
-          desc:"มุมกาแฟและเครื่องดื่มชั้น 9\nเครื่องชงกาแฟ ตู้น้ำ ที่นั่งพักผ่อน\nเปิด 07:30–17:00",
-          tags:["กาแฟ","เครื่องดื่ม","พักผ่อน"] },
-        { id:"f9-student",   name:"ห้องพักนักศึกษา",          icon:"🎓", color:"#34d399",
-          desc:"ห้องพักและทำงานสำหรับนักศึกษา\nระดับบัณฑิตศึกษาภาควิชาสุขวิทยาเขตร้อน\nมีโต๊ะทำงาน คอมพิวเตอร์",
-          tags:["นักศึกษา","บัณฑิต","ทำงาน"] },
-      ]
     }
   }
 };
@@ -305,6 +287,13 @@ const MARKER_MAP = {
     <div id="popup-desc">—</div>
     <div class="ptags" id="popup-tags"></div>
   </div>
+</div>
+
+<!-- Destination Bar -->
+<div id="dest-bar" class="hidden">
+  <span id="dest-room-icon">📍</span>
+  <span id="dest-room-name">—</span>
+  <button id="dest-cancel" onclick="cancelDest()">✕ ยกเลิก</button>
 </div>
 
 <!-- Map Panel -->
@@ -454,21 +443,21 @@ const FLOOR_MAPS = {
 <rect x="122" y="563" width="18" height="99"  fill="rgba(255,255,255,0.06)" stroke="rgba(0,255,231,0.3)" stroke-width="1" stroke-dasharray="2 2"/>
 
 <!-- ══ ROW A ══ -->
-<g class="room"><rect x="50"  y="40" width="72" height="65" fill="#1a3a6a" stroke="#4a8abf" stroke-width="0.8"/><text x="86"  y="62" text-anchor="middle" class="lbl th">🚹🚺</text><text x="86"  y="78" text-anchor="middle" class="lbl ts">ห้องน้ำ</text></g>
-<g class="room"><rect x="50"  y="105" width="72" height="66" fill="#2a2a2a" stroke="#888" stroke-width="0.8"/><text x="86"  y="124" text-anchor="middle" class="lbl th">📦</text><text x="86"  y="140" text-anchor="middle" class="lbl ts">เก็บของแม่บ้าน</text></g>
-<g class="room"><rect x="122" y="73" width="72" height="98" fill="#3a2a0a" stroke="#d97706" stroke-width="0.8"/><text x="158" y="110" text-anchor="middle" class="lbl th">🔼🔼🔼</text><text x="158" y="130" text-anchor="middle" class="lbl ts">ลิฟท์ ×3</text></g>
-<g class="room"><rect x="266" y="40" width="234" height="131" fill="#0a2a2a" stroke="#0d9488" stroke-width="0.8"/><text x="383" y="98" text-anchor="middle" class="lbl th">🏢 THOHUN</text><text x="383" y="116" text-anchor="middle" class="lbl ts">สำนักงาน</text></g>
-<g class="room"><rect x="446" y="40" width="135" height="131" fill="#2a2a2a" stroke="#888" stroke-width="0.8"/><text x="513" y="98" text-anchor="middle" class="lbl th">🧹 ห้องแม่บ้าน</text></g>
-<g class="room"><rect x="581" y="40" width="81" height="131" fill="#3a0a0a" stroke="#dc2626" stroke-width="0.8"/><text x="621" y="78" text-anchor="middle" class="lbl th">🚨 บันได</text><text x="621" y="96" text-anchor="middle" class="lbl ts">หนีไฟ</text></g>
+<g class="room" data-id="f9-toilet-a"><rect x="50"  y="40" width="72" height="65" fill="#1a3a6a" stroke="#4a8abf" stroke-width="0.8"/><text x="86"  y="62" text-anchor="middle" class="lbl th">🚹🚺</text><text x="86"  y="78" text-anchor="middle" class="lbl ts">ห้องน้ำ</text></g>
+<g class="room" data-id="f9-storage"><rect x="50"  y="105" width="72" height="66" fill="#2a2a2a" stroke="#888" stroke-width="0.8"/><text x="86"  y="124" text-anchor="middle" class="lbl th">📦</text><text x="86"  y="140" text-anchor="middle" class="lbl ts">เก็บของแม่บ้าน</text></g>
+<g class="room" data-id="f9-lift"><rect x="122" y="73" width="72" height="98" fill="#3a2a0a" stroke="#d97706" stroke-width="0.8"/><text x="158" y="110" text-anchor="middle" class="lbl th">🔼🔼🔼</text><text x="158" y="130" text-anchor="middle" class="lbl ts">ลิฟท์ ×3</text></g>
+<g class="room" data-id="f9-thohun"><rect x="266" y="40" width="234" height="131" fill="#0a2a2a" stroke="#0d9488" stroke-width="0.8"/><text x="383" y="98" text-anchor="middle" class="lbl th">🏢 THOHUN</text><text x="383" y="116" text-anchor="middle" class="lbl ts">สำนักงาน</text></g>
+<g class="room" data-id="f9-maid"><rect x="446" y="40" width="135" height="131" fill="#2a2a2a" stroke="#888" stroke-width="0.8"/><text x="513" y="98" text-anchor="middle" class="lbl th">🧹 ห้องแม่บ้าน</text></g>
+<g class="room" data-id="f9-fire"><rect x="581" y="40" width="81" height="131" fill="#3a0a0a" stroke="#dc2626" stroke-width="0.8"/><text x="621" y="78" text-anchor="middle" class="lbl th">🚨 บันได</text><text x="621" y="96" text-anchor="middle" class="lbl ts">หนีไฟ</text></g>
 
 <!-- ══ ROW B ล่าง ══ -->
-<g class="room"><rect x="50"  y="215" width="72" height="87" fill="#2a2a2a" stroke="#888" stroke-width="0.8"/><text x="86"  y="252" text-anchor="middle" class="lbl th">🪜</text><text x="86"  y="270" text-anchor="middle" class="lbl ts">บันไดในอาคาร</text></g>
-<g class="room"><rect x="266" y="215" width="180" height="87" fill="#3a1a00" stroke="#d97706" stroke-width="0.8"/><text x="356" y="259" text-anchor="middle" class="lbl th">👥 ห้องเจ้าหน้าที่</text></g>
-<g class="room"><rect x="446" y="215" width="108" height="87" fill="#0a2a2a" stroke="#0d9488" stroke-width="0.8"/><text x="500" y="250" text-anchor="middle" class="lbl th">🎓</text><text x="500" y="268" text-anchor="middle" class="lbl ts">ห้องพักนักศึกษา</text></g>
-<g class="room"><rect x="581" y="215" width="81" height="87" fill="#1a3a6a" stroke="#4a8abf" stroke-width="0.8"/><text x="621" y="259" text-anchor="middle" class="lbl th">🚹🚺 ห้องน้ำ</text></g>
+<g class="room" data-id="f9-stairs"><rect x="50"  y="215" width="72" height="87" fill="#2a2a2a" stroke="#888" stroke-width="0.8"/><text x="86"  y="252" text-anchor="middle" class="lbl th">🪜</text><text x="86"  y="270" text-anchor="middle" class="lbl ts">บันไดในอาคาร</text></g>
+<g class="room" data-id="f9-staff-b"><rect x="266" y="215" width="180" height="87" fill="#3a1a00" stroke="#d97706" stroke-width="0.8"/><text x="356" y="259" text-anchor="middle" class="lbl th">👥 ห้องเจ้าหน้าที่</text></g>
+<g class="room" data-id="f9-student"><rect x="446" y="215" width="108" height="87" fill="#0a2a2a" stroke="#0d9488" stroke-width="0.8"/><text x="500" y="250" text-anchor="middle" class="lbl th">🎓</text><text x="500" y="268" text-anchor="middle" class="lbl ts">ห้องพักนักศึกษา</text></g>
+<g class="room" data-id="f9-toilet-b"><rect x="581" y="215" width="81" height="87" fill="#1a3a6a" stroke="#4a8abf" stroke-width="0.8"/><text x="621" y="259" text-anchor="middle" class="lbl th">🚹🚺 ห้องน้ำ</text></g>
 
 <!-- ประตูทางเข้า col②–②.5 row B -->
-<g class="room"><rect x="194" y="215" width="72" height="29" fill="#0a1a0a" stroke="#22c55e" stroke-width="1.5"/><text x="230" y="233" text-anchor="middle" class="lbl th">🚪 ประตูทางเข้า</text></g>
+<g class="room" data-id="f9-door1"><rect x="194" y="215" width="72" height="29" fill="#0a1a0a" stroke="#22c55e" stroke-width="1.5"/><text x="230" y="233" text-anchor="middle" class="lbl th">🚪 ประตูทางเข้า</text></g>
 
 
 
@@ -488,27 +477,27 @@ const FLOOR_MAPS = {
 <text x="266" y="193" text-anchor="middle" transform="rotate(-90,266,193)" style="font-size:7px;fill:#22c55e;font-weight:600">🚪 ประตู</text>
 
 <!-- ══ ROW C ══ -->
-<g class="room"><rect x="50" y="302" width="72" height="63" fill="#0a2a0a" stroke="#16a34a" stroke-width="0.8"/><text x="86" y="333" text-anchor="middle" class="lbl th">👨‍🏫 ห้องพัก อ.1</text></g>
-<g class="room"><rect x="122" y="302" width="72" height="63" fill="#0a2a0a" stroke="#16a34a" stroke-width="0.8"/><text x="158" y="333" text-anchor="middle" class="lbl th">👨‍🏫 ห้องพัก อ.2</text></g>
-<g class="room"><rect x="266" y="302" width="180" height="63" fill="#3a1a00" stroke="#d97706" stroke-width="0.8"/><text x="356" y="333" text-anchor="middle" class="lbl th">👥 ห้องเจ้าหน้าที่</text></g>
-<g class="room"><rect x="446" y="302" width="108" height="63" fill="#0a2a0a" stroke="#16a34a" stroke-width="0.8"/><text x="500" y="333" text-anchor="middle" class="lbl th">👨‍🏫 ห้องพัก อ.</text></g>
-<g class="room"><rect x="581" y="302" width="81" height="63" fill="#0a2a0a" stroke="#16a34a" stroke-width="0.8"/><text x="621" y="333" text-anchor="middle" class="lbl th">👨‍🏫 ห้องพัก อ.</text></g>
+<g class="room" data-id="f9-faculty-c1"><rect x="50" y="302" width="72" height="63" fill="#0a2a0a" stroke="#16a34a" stroke-width="0.8"/><text x="86" y="333" text-anchor="middle" class="lbl th">👨‍🏫 ห้องพัก อ.1</text></g>
+<g class="room" data-id="f9-faculty-c2"><rect x="122" y="302" width="72" height="63" fill="#0a2a0a" stroke="#16a34a" stroke-width="0.8"/><text x="158" y="333" text-anchor="middle" class="lbl th">👨‍🏫 ห้องพัก อ.2</text></g>
+<g class="room" data-id="f9-staff-c"><rect x="266" y="302" width="180" height="63" fill="#3a1a00" stroke="#d97706" stroke-width="0.8"/><text x="356" y="333" text-anchor="middle" class="lbl th">👥 ห้องเจ้าหน้าที่</text></g>
+<g class="room" data-id="f9-faculty-c3"><rect x="446" y="302" width="108" height="63" fill="#0a2a0a" stroke="#16a34a" stroke-width="0.8"/><text x="500" y="333" text-anchor="middle" class="lbl th">👨‍🏫 ห้องพัก อ.</text></g>
+<g class="room" data-id="f9-faculty-c4"><rect x="581" y="302" width="81" height="63" fill="#0a2a0a" stroke="#16a34a" stroke-width="0.8"/><text x="621" y="333" text-anchor="middle" class="lbl th">👨‍🏫 ห้องพัก อ.</text></g>
 
-<g class="room"><rect x="122" y="365" width="72" height="198" fill="#0a2a0a" stroke="#16a34a" stroke-width="0.8"/><text x="158" y="445" text-anchor="middle" class="lbl th">🌿</text><text x="158" y="465" text-anchor="middle" class="lbl ts">พักผ่อน</text></g>
+<g class="room" data-id="f9-relax"><rect x="122" y="365" width="72" height="198" fill="#0a2a0a" stroke="#16a34a" stroke-width="0.8"/><text x="158" y="445" text-anchor="middle" class="lbl th">🌿</text><text x="158" y="465" text-anchor="middle" class="lbl ts">พักผ่อน</text></g>
 
 <!-- ══ ROW D ══ -->
-<g class="room"><rect x="50"  y="365" width="72" height="99" fill="#0a2a0a" stroke="#16a34a" stroke-width="0.8"/><text x="86"  y="400" text-anchor="middle" class="lbl th">👨‍🏫</text><text x="86"  y="418" text-anchor="middle" class="lbl ts">ห้องพัก อ.D</text></g>
-<g class="room"><rect x="266" y="365" width="180" height="198" fill="#1a0a2a" stroke="#7c3aed" stroke-width="0.8"/><text x="356" y="445" text-anchor="middle" class="lbl th">🎤</text><text x="356" y="465" text-anchor="middle" class="lbl th">JK Commons</text><text x="356" y="483" text-anchor="middle" class="lbl ts">25–40 คน</text></g>
+<g class="room" data-id="f9-faculty-d"><rect x="50"  y="365" width="72" height="99" fill="#0a2a0a" stroke="#16a34a" stroke-width="0.8"/><text x="86"  y="400" text-anchor="middle" class="lbl th">👨‍🏫</text><text x="86"  y="418" text-anchor="middle" class="lbl ts">ห้องพัก อ.D</text></g>
+<g class="room" data-id="f9-jk"><rect x="266" y="365" width="180" height="198" fill="#1a0a2a" stroke="#7c3aed" stroke-width="0.8"/><text x="356" y="445" text-anchor="middle" class="lbl th">🎤</text><text x="356" y="465" text-anchor="middle" class="lbl th">JK Commons</text><text x="356" y="483" text-anchor="middle" class="lbl ts">25–40 คน</text></g>
 <g class="room"><rect x="446" y="365" width="38" height="238" fill="#0a2a0a" stroke="#16a34a" stroke-width="0.8"/><text x="465" y="460" text-anchor="middle" class="lbl th">🌿</text><text x="465" y="480" text-anchor="middle" class="lbl ts" style="font-size:8px">พักผ่อน</text></g>
 
 <!-- ══ ROW E ══ -->
-<g class="room"><rect x="50"  y="464" width="72" height="99" fill="#0a2a0a" stroke="#16a34a" stroke-width="0.8"/><text x="86"  y="500" text-anchor="middle" class="lbl th">👨‍🏫</text><text x="86"  y="518" text-anchor="middle" class="lbl ts">ห้องพัก อ.E</text></g>
+<g class="room" data-id="f9-faculty-e"><rect x="50"  y="464" width="72" height="99" fill="#0a2a0a" stroke="#16a34a" stroke-width="0.8"/><text x="86"  y="500" text-anchor="middle" class="lbl th">👨‍🏫</text><text x="86"  y="518" text-anchor="middle" class="lbl ts">ห้องพัก อ.E</text></g>
 
 <!-- ══ ROW F ══ -->
-<g class="room"><rect x="50"  y="563" width="72" height="99" fill="#0a2a0a" stroke="#16a34a" stroke-width="0.8"/><text x="86"  y="598" text-anchor="middle" class="lbl th">👨‍🏫</text><text x="86"  y="616" text-anchor="middle" class="lbl ts">ห้องพัก อ.F1</text></g>
-<g class="room"><rect x="140" y="563" width="54" height="99" fill="#0a2a0a" stroke="#16a34a" stroke-width="0.8"/><text x="167" y="598" text-anchor="middle" class="lbl th">👨‍🏫</text><text x="167" y="616" text-anchor="middle" class="lbl ts">ห้องพัก อ.F2</text></g>
-<g class="room"><rect x="266" y="563" width="180" height="99" fill="#1a2a4a" stroke="#3b82f6" stroke-width="0.8"/><text x="356" y="596" text-anchor="middle" class="lbl th">🖥️ Co-working Space 2</text><text x="356" y="614" text-anchor="middle" class="lbl ts">col②.5–④</text></g>
-<g class="room"><rect x="446" y="603" width="38" height="59" fill="#1a3a6a" stroke="#4a8abf" stroke-width="0.8"/><text x="465" y="625" text-anchor="middle" class="lbl th">🚹🚺</text><text x="465" y="645" text-anchor="middle" class="lbl ts" style="font-size:7px">ห้องน้ำ</text></g>
+<g class="room" data-id="f9-faculty-f1"><rect x="50"  y="563" width="72" height="99" fill="#0a2a0a" stroke="#16a34a" stroke-width="0.8"/><text x="86"  y="598" text-anchor="middle" class="lbl th">👨‍🏫</text><text x="86"  y="616" text-anchor="middle" class="lbl ts">ห้องพัก อ.F1</text></g>
+<g class="room" data-id="f9-faculty-f2"><rect x="140" y="563" width="54" height="99" fill="#0a2a0a" stroke="#16a34a" stroke-width="0.8"/><text x="167" y="598" text-anchor="middle" class="lbl th">👨‍🏫</text><text x="167" y="616" text-anchor="middle" class="lbl ts">ห้องพัก อ.F2</text></g>
+<g class="room" data-id="f9-cowork"><rect x="266" y="563" width="180" height="99" fill="#1a2a4a" stroke="#3b82f6" stroke-width="0.8"/><text x="356" y="596" text-anchor="middle" class="lbl th">🖥️ Co-working Space 2</text><text x="356" y="614" text-anchor="middle" class="lbl ts">col②.5–④</text></g>
+<g class="room" data-id="f9-toilet-f"><rect x="446" y="603" width="38" height="59" fill="#1a3a6a" stroke="#4a8abf" stroke-width="0.8"/><text x="465" y="625" text-anchor="middle" class="lbl th">🚹🚺</text><text x="465" y="645" text-anchor="middle" class="lbl ts" style="font-size:7px">ห้องน้ำ</text></g>
 
   `
 };
@@ -666,26 +655,127 @@ function buildQRGrid() {
 </script>
 
 <script>
-// Pinch zoom for floor map
+// ── ZOOM / PAN for floor map ──
 (function(){
-  const wrap = document.querySelector('.fmap-wrap');
-  if(!wrap) return;
-  let scale=1, tx=0, ty=0, isPan=false, startX, startY, lastDist, lastScale;
-  function getInner(){ return document.getElementById('fmap-inner'); }
-  function setT(){ const el=getInner(); if(el) el.style.transform=`translate(${tx}px,${ty}px) scale(${scale})`; }
-  wrap.addEventListener('touchstart',e=>{
-    const el=getInner(); if(!el) return;
-    if(e.touches.length===2){ lastDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY); lastScale=scale; isPan=false; }
-    else if(e.touches.length===1){ isPan=true; startX=e.touches[0].clientX-tx; startY=e.touches[0].clientY-ty; }
-  },{passive:true});
-  wrap.addEventListener('touchmove',e=>{
-    e.preventDefault();
-    if(e.touches.length===2){ const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY); scale=Math.min(5,Math.max(0.3,lastScale*(d/lastDist))); setT(); }
-    else if(e.touches.length===1&&isPan){ tx=e.touches[0].clientX-startX; ty=e.touches[0].clientY-startY; setT(); }
-  },{passive:false});
-  let lastTap=0;
-  wrap.addEventListener('touchend',e=>{ const now=Date.now(); if(now-lastTap<300){scale=1;tx=0;ty=0;setT();} lastTap=now; });
+  let wrap, inner, scale=1, tx=0, ty=0, isPan=false, startX, startY, lastDist, lastScale=1;
+  const MIN=0.3, MAX=5;
+  function init(){
+    wrap = document.querySelector('.fmap-wrap');
+    inner = document.getElementById('fmap-inner');
+    if(!wrap||!inner) return;
+    function setT(){ inner.style.transform=`translate(${tx}px,${ty}px) scale(${scale})`; }
+    // touch
+    wrap.addEventListener('touchstart',e=>{
+      if(e.touches.length===2){ lastDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY); lastScale=scale; isPan=false; }
+      else if(e.touches.length===1){ isPan=true; startX=e.touches[0].clientX-tx; startY=e.touches[0].clientY-ty; }
+    },{passive:true});
+    wrap.addEventListener('touchmove',e=>{
+      e.preventDefault();
+      if(e.touches.length===2){ const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY); scale=Math.min(MAX,Math.max(MIN,lastScale*(d/lastDist))); setT(); }
+      else if(e.touches.length===1&&isPan){ tx=e.touches[0].clientX-startX; ty=e.touches[0].clientY-startY; setT(); }
+    },{passive:false});
+    let lastTap=0;
+    wrap.addEventListener('touchend',e=>{ const now=Date.now(); if(now-lastTap<300){scale=1;tx=0;ty=0;setT();} lastTap=now; });
+    // mouse drag
+    wrap.addEventListener('mousedown',e=>{ isPan=true; startX=e.clientX-tx; startY=e.clientY-ty; });
+    window.addEventListener('mousemove',e=>{ if(!isPan)return; tx=e.clientX-startX; ty=e.clientY-startY; setT(); });
+    window.addEventListener('mouseup',()=>isPan=false);
+    // mouse wheel zoom to point
+    wrap.addEventListener('wheel',e=>{
+      e.preventDefault();
+      const rect=wrap.getBoundingClientRect();
+      const ox=e.clientX-rect.left, oy=e.clientY-rect.top;
+      const delta=e.deltaY>0?0.9:1.1;
+      const ns=Math.min(MAX,Math.max(MIN,scale*delta));
+      tx=ox-(ox-tx)*(ns/scale); ty=oy-(oy-ty)*(ns/scale); scale=ns; setT();
+    },{passive:false});
+  }
+  // init after map renders
+  document.addEventListener('DOMContentLoaded', init);
+  window._resetMapZoom=()=>{ scale=1;tx=0;ty=0; const el=document.getElementById('fmap-inner'); if(el) el.style.transform=''; };
 })();
+
+// ── ROOM COORDS (พิกัด GPS จริงต้องใส่เอง) ──
+const ROOM_COORDS = {
+  "f9-lift":       { lat:13.7954, lng:100.4300, name:"ลิฟท์ ×3",             icon:"🔼" },
+  "f9-toilet-a":   { lat:13.7954, lng:100.4299, name:"ห้องน้ำ A",            icon:"🚹🚺" },
+  "f9-storage":    { lat:13.7954, lng:100.4299, name:"ห้องเก็บของแม่บ้าน",   icon:"📦" },
+  "f9-maid":       { lat:13.7955, lng:100.4302, name:"ห้องแม่บ้าน",          icon:"🧹" },
+  "f9-thohun":     { lat:13.7954, lng:100.4301, name:"สำนักงาน THOHUN",      icon:"🏢" },
+  "f9-fire":       { lat:13.7955, lng:100.4303, name:"บันไดหนีไฟ",           icon:"🚨" },
+  "f9-stairs":     { lat:13.7953, lng:100.4299, name:"บันไดในอาคาร",         icon:"🪜" },
+  "f9-door1":      { lat:13.7954, lng:100.4300, name:"ประตูทางเข้า 1",       icon:"🚪" },
+  "f9-staff-b":    { lat:13.7954, lng:100.4301, name:"ห้องเจ้าหน้าที่ B",   icon:"👥" },
+  "f9-student":    { lat:13.7954, lng:100.4302, name:"ห้องพักนักศึกษา",      icon:"🎓" },
+  "f9-toilet-b":   { lat:13.7955, lng:100.4303, name:"ห้องน้ำ B",            icon:"🚹🚺" },
+  "f9-faculty-c1": { lat:13.7953, lng:100.4299, name:"ห้องพักอาจารย์ C1",   icon:"👨‍🏫" },
+  "f9-faculty-c2": { lat:13.7953, lng:100.4299, name:"ห้องพักอาจารย์ C2",   icon:"👨‍🏫" },
+  "f9-staff-c":    { lat:13.7953, lng:100.4301, name:"ห้องเจ้าหน้าที่ C",   icon:"👥" },
+  "f9-faculty-c3": { lat:13.7953, lng:100.4302, name:"ห้องพักอาจารย์ C3",   icon:"👨‍🏫" },
+  "f9-faculty-c4": { lat:13.7954, lng:100.4303, name:"ห้องพักอาจารย์ C4",   icon:"👨‍🏫" },
+  "f9-faculty-d":  { lat:13.7952, lng:100.4299, name:"ห้องพักอาจารย์ D",    icon:"👨‍🏫" },
+  "f9-jk":         { lat:13.7952, lng:100.4301, name:"JK Commons",           icon:"🎤" },
+  "f9-relax":      { lat:13.7952, lng:100.4302, name:"พื้นที่พักผ่อน",       icon:"🌿" },
+  "f9-faculty-e":  { lat:13.7951, lng:100.4299, name:"ห้องพักอาจารย์ E",    icon:"👨‍🏫" },
+  "f9-faculty-f1": { lat:13.7950, lng:100.4299, name:"ห้องพักอาจารย์ F1",   icon:"👨‍🏫" },
+  "f9-faculty-f2": { lat:13.7950, lng:100.4299, name:"ห้องพักอาจารย์ F2",   icon:"👨‍🏫" },
+  "f9-cowork":     { lat:13.7950, lng:100.4301, name:"Co-working Space 2",   icon:"🖥️" },
+  "f9-toilet-f":   { lat:13.7950, lng:100.4302, name:"ห้องน้ำ F",            icon:"🚹🚺" },
+};
+// โหลดพิกัดที่บันทึกไว้ (ถ้ามี)
+try{ const s=localStorage.getItem('tmhg_coords'); if(s) Object.assign(ROOM_COORDS,JSON.parse(s)); }catch(e){}
+
+let destRoom=null, userLat=null, userLng=null;
+
+// GPS
+navigator.geolocation&&navigator.geolocation.watchPosition(
+  p=>{ userLat=p.coords.latitude; userLng=p.coords.longitude; updateDestDist(); },
+  e=>console.warn('GPS:',e), {enableHighAccuracy:true,maximumAge:2000}
+);
+
+function haversine(la1,lo1,la2,lo2){
+  const R=6371000,dl=(la2-la1)*Math.PI/180,dg=(lo2-lo1)*Math.PI/180;
+  const a=Math.sin(dl/2)**2+Math.cos(la1*Math.PI/180)*Math.cos(la2*Math.PI/180)*Math.sin(dg/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+function fmtDist(m){ return m<1000?`${Math.round(m)} ม.`:`${(m/1000).toFixed(1)} กม.`; }
+
+function selectDest(id){
+  const c=ROOM_COORDS[id]; if(!c) return;
+  destRoom={id,...c};
+  document.querySelectorAll('.room').forEach(r=>r.classList.remove('selected'));
+  const el=document.querySelector(`[data-id="${id}"]`);
+  if(el) el.classList.add('selected');
+  const bar=document.getElementById('dest-bar');
+  document.getElementById('dest-room-icon').textContent=c.icon;
+  document.getElementById('dest-room-name').textContent=c.name;
+  bar.classList.remove('hidden');
+  updateDestDist();
+}
+
+function updateDestDist(){
+  if(!destRoom||userLat===null) return;
+  const d=haversine(userLat,userLng,destRoom.lat,destRoom.lng);
+  document.getElementById('dest-room-name').textContent=destRoom.icon+' '+destRoom.name+' — '+fmtDist(d);
+}
+
+function cancelDest(){
+  destRoom=null;
+  document.querySelectorAll('.room').forEach(r=>r.classList.remove('selected'));
+  document.getElementById('dest-bar').classList.add('hidden');
+}
+
+// bind clicks on SVG rooms after renderFloorMap
+const _origRenderFloorMap = renderFloorMap;
+function renderFloorMap(f){
+  _origRenderFloorMap(f);
+  setTimeout(()=>{
+    document.querySelectorAll('#floor-svg .room').forEach(g=>{
+      const id=g.dataset.id; if(!id) return;
+      g.addEventListener('click',()=>{ selectDest(id); showRoom(id); });
+    });
+  },0);
+}
 </script>
 </body>
 </html>
