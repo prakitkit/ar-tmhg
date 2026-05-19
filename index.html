@@ -319,6 +319,7 @@ const MARKER_MAP = {
     </div>
     <div id="popup-desc">—</div>
     <div class="ptags" id="popup-tags"></div>
+    <button id="popup-nav-btn" onclick="navFromPopup()" style="display:none;width:100%;margin-top:10px;background:#00ffe7;color:#0a0e1a;border:none;border-radius:50px;padding:11px;font-size:14px;font-weight:700;cursor:pointer;">🧭 นำทางไปห้องนี้</button>
   </div>
 </div>
 
@@ -618,9 +619,12 @@ function findRoom(id) {
   return null;
 }
 
+let currentPopupRoomId = null;
+
 function showRoom(id) {
   const room = findRoom(id);
   if (!room) return;
+  currentPopupRoomId = id;
   document.getElementById('scan-hint').style.display = 'none';
   document.getElementById('popup-card').style.setProperty('--popup-color', room.color || '#00ffe7');
   document.getElementById('popup-icon').textContent = room.icon;
@@ -636,7 +640,17 @@ function showRoom(id) {
     el.style.borderColor = (room.color || '#00ffe7') + '44';
     tagsEl.appendChild(el);
   });
+  // แสดงปุ่มนำทางถ้ามีพิกัดห้องนี้
+  const navBtn = document.getElementById('popup-nav-btn');
+  navBtn.style.display = ROOM_COORDS[id] ? 'block' : 'none';
   document.getElementById('popup').style.display = 'block';
+}
+
+function navFromPopup() {
+  if (!currentPopupRoomId) return;
+  selectDest(currentPopupRoomId);
+  closePopup();
+  startNav();
 }
 
 function closePopup() {
@@ -748,7 +762,7 @@ function renderRoomList(f) {
         <div class="ri-desc">${room.desc.split('\n')[0]}</div>
       </div>
       <div class="ri-fl">${floor.label}</div>`;
-    item.onclick = () => { closeMap(); showRoom(room.id); };
+    item.onclick = () => { selectDest(room.id); closeMap(); showRoom(room.id); };
     container.appendChild(item);
   });
 }
@@ -971,20 +985,21 @@ function exportCalCoords(){
 }
 
 // ── COMPASS ──
-let userHeading=0;
-(function(){
-  function listen(){ window.addEventListener('deviceorientationabsolute',onO,true); window.addEventListener('deviceorientation',onO,true); }
-  function onO(e){ if(e.webkitCompassHeading!=null) userHeading=e.webkitCompassHeading; else if(e.alpha!=null) userHeading=(360-e.alpha)%360; }
+let userHeading=0, compassStarted=false;
+function onOrientEvent(e){ if(e.webkitCompassHeading!=null) userHeading=e.webkitCompassHeading; else if(e.alpha!=null) userHeading=(360-e.alpha)%360; }
+function startCompass(){
+  if(compassStarted) return; compassStarted=true;
   if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){
-    DeviceOrientationEvent.requestPermission().then(s=>{ if(s==='granted') listen(); }).catch(()=>{});
-  } else listen();
-})();
+    DeviceOrientationEvent.requestPermission().then(s=>{ if(s==='granted'){ window.addEventListener('deviceorientationabsolute',onOrientEvent,true); window.addEventListener('deviceorientation',onOrientEvent,true); } }).catch(()=>{});
+  } else { window.addEventListener('deviceorientationabsolute',onOrientEvent,true); window.addEventListener('deviceorientation',onOrientEvent,true); }
+}
 
 // ── AR NAVIGATION ──
 let navActive=false, camStream=null, navRaf=null;
 
 async function startNav(){
   if(!destRoom){alert('กรุณาเลือกห้องปลายทางก่อน');return;}
+  startCompass();
   navActive=true;
   document.getElementById('nav-overlay').classList.add('active');
   try{
