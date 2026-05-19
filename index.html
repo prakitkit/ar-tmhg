@@ -593,8 +593,15 @@ function switchFloor(f) {
   renderFloorMap(f); renderRoomList(f);
 }
 
+const FLOOR_VIEWBOX = { 8: '0 0 340 230', 9: '0 0 680 730' };
+
 function renderFloorMap(f) {
-  document.getElementById('floor-svg').innerHTML = FLOOR_MAPS[f] || '';
+  const svg = document.getElementById('floor-svg');
+  svg.setAttribute('viewBox', FLOOR_VIEWBOX[f] || '0 0 340 230');
+  svg.innerHTML = FLOOR_MAPS[f] || '';
+  svg.querySelectorAll('.room[data-id]').forEach(g => {
+    g.addEventListener('click', () => { selectDest(g.dataset.id); showRoom(g.dataset.id); });
+  });
 }
 
 function renderRoomList(f) {
@@ -765,17 +772,6 @@ function cancelDest(){
   document.getElementById('dest-bar').classList.add('hidden');
 }
 
-// bind clicks on SVG rooms after renderFloorMap
-const _origRenderFloorMap = renderFloorMap;
-function renderFloorMap(f){
-  _origRenderFloorMap(f);
-  setTimeout(()=>{
-    document.querySelectorAll('#floor-svg .room').forEach(g=>{
-      const id=g.dataset.id; if(!id) return;
-      g.addEventListener('click',()=>{ selectDest(id); showRoom(id); });
-    });
-  },0);
-}
 </script>
 </body>
 </html>
