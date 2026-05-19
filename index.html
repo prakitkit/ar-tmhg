@@ -66,8 +66,8 @@ a-scene{width:100%!important;height:100%!important;}
 .ftabs{display:flex;gap:7px;margin-bottom:13px;}
 .ftab{flex:1;padding:8px;text-align:center;border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;border:1px solid rgba(0,255,231,0.2);background:transparent;color:rgba(255,255,255,0.4);}
 .ftab.active{background:rgba(0,255,231,0.1);color:var(--neon);border-color:rgba(0,255,231,0.4);}
-.fmap-wrap{background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.06);border-radius:13px;padding:10px;margin-bottom:13px;}
-.fmap-wrap svg{width:100%;height:auto;}
+.fmap-wrap{background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.06);border-radius:13px;padding:10px;margin-bottom:13px;overflow:hidden;position:relative;touch-action:none;cursor:grab;}
+.fmap-wrap svg{display:block;width:600px;height:auto;}.fmap-inner{transform-origin:0 0;will-change:transform;display:block;}
 .rlist{display:flex;flex-direction:column;gap:6px;}
 .ri{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.055);border-radius:11px;padding:10px 12px;cursor:pointer;}
 .ri:active{background:rgba(0,255,231,0.06);}
@@ -131,9 +131,83 @@ const BUILDING = {
     9: {
       label: "ชั้น 9",
       rooms: [
-        { id:"f9-lift",      name:"ลิฟท์ (ชั้น 9)",           icon:"🔼", color:"#a78bfa",
-          desc:"ลิฟท์โดยสาร ฝั่งกลางอาคาร\nให้บริการชั้น 1–10",
+        { id:"f9-lift",      name:"ลิฟท์ ×3",                icon:"🔼", color:"#a78bfa",
+          desc:"ลิฟท์โดยสาร 3 ตัว col①.5\nให้บริการชั้น 1–10 รองรับรถเข็น",
           tags:["ลิฟท์","รถเข็น"] },
+        { id:"f9-toilet-a",  name:"ห้องน้ำ ชั้น 9 (A)",       icon:"🚹🚺", color:"#60a5fa",
+          desc:"ห้องน้ำ col①–①.5 row A",
+          tags:["ห้องน้ำ"] },
+        { id:"f9-storage",   name:"ห้องเก็บของแม่บ้าน",        icon:"📦", color:"#888",
+          desc:"ห้องเก็บของแม่บ้าน col①–①.5 row A ล่าง",
+          tags:["แม่บ้าน","เก็บของ"] },
+        { id:"f9-maid",      name:"ห้องแม่บ้าน",               icon:"🧹", color:"#888",
+          desc:"ห้องแม่บ้าน col④–⑤.5 row A",
+          tags:["แม่บ้าน"] },
+        { id:"f9-thohun",    name:"สำนักงาน THOHUN",           icon:"🏢", color:"#00ffe7",
+          desc:"สำนักงาน THOHUN col②.5–④.5 row A",
+          tags:["THOHUN","สำนักงาน"] },
+        { id:"f9-fire",      name:"บันไดหนีไฟ",                icon:"🚨", color:"#ef4444",
+          desc:"บันไดหนีไฟ col⑤.5–⑥ row A\nเปิดอัตโนมัติเมื่อมีเหตุฉุกเฉิน",
+          tags:["ฉุกเฉิน","บันได"] },
+        { id:"f9-stairs",    name:"บันไดในอาคาร",              icon:"🪜", color:"#a78bfa",
+          desc:"บันไดในอาคาร col① row B",
+          tags:["บันได"] },
+        { id:"f9-door1",     name:"ประตูทางเข้า 1",            icon:"🚪", color:"#22c55e",
+          desc:"ประตูทางเข้า col②–②.5 row B",
+          tags:["ประตู","ทางเข้า"] },
+        { id:"f9-door2",     name:"ประตูทางเข้า 2",            icon:"🚪", color:"#22c55e",
+          desc:"ประตูทางเข้าแนวตั้ง col②.5 ในทางเดินหลัก",
+          tags:["ประตู","ทางเข้า"] },
+        { id:"f9-staff-b",   name:"ห้องเจ้าหน้าที่ (B)",       icon:"👥", color:"#fbbf24",
+          desc:"ห้องเจ้าหน้าที่ col②.5–④ row B",
+          tags:["เจ้าหน้าที่"] },
+        { id:"f9-student",   name:"ห้องพักนักศึกษา",           icon:"🎓", color:"#34d399",
+          desc:"ห้องพักนักศึกษา col④–⑤ row B",
+          tags:["นักศึกษา","พัก"] },
+        { id:"f9-toilet-b",  name:"ห้องน้ำ (B)",               icon:"🚹🚺", color:"#60a5fa",
+          desc:"ห้องน้ำ col⑤.5–⑥ row B",
+          tags:["ห้องน้ำ"] },
+        { id:"f9-faculty-c1",name:"ห้องพักอาจารย์ C1",         icon:"👨‍🏫", color:"#ff6b35",
+          desc:"ห้องพักอาจารย์ col①–①.5 row C",
+          tags:["อาจารย์","พัก"] },
+        { id:"f9-faculty-c2",name:"ห้องพักอาจารย์ C2",         icon:"👨‍🏫", color:"#ff6b35",
+          desc:"ห้องพักอาจารย์ col①.5–② row C",
+          tags:["อาจารย์","พัก"] },
+        { id:"f9-staff-c",   name:"ห้องเจ้าหน้าที่ (C)",       icon:"👥", color:"#fbbf24",
+          desc:"ห้องเจ้าหน้าที่ col②.5–④ row C",
+          tags:["เจ้าหน้าที่"] },
+        { id:"f9-faculty-c3",name:"ห้องพักอาจารย์ C3",         icon:"👨‍🏫", color:"#ff6b35",
+          desc:"ห้องพักอาจารย์ col④–⑤ row C",
+          tags:["อาจารย์","พัก"] },
+        { id:"f9-faculty-c4",name:"ห้องพักอาจารย์ C4",         icon:"👨‍🏫", color:"#ff6b35",
+          desc:"ห้องพักอาจารย์ col⑤.5–⑥ row C",
+          tags:["อาจารย์","พัก"] },
+        { id:"f9-faculty-d", name:"ห้องพักอาจารย์ D",          icon:"👨‍🏫", color:"#ff6b35",
+          desc:"ห้องพักอาจารย์ col①–①.5 row D",
+          tags:["อาจารย์","พัก"] },
+        { id:"f9-jk",        name:"ห้องประชุม JK Commons",     icon:"🎤", color:"#00ffe7",
+          desc:"ห้องประชุม JK Commons col②.5–④ row D–E\n25–40 คน สัมมนา บรรยาย",
+          tags:["JK Commons","ประชุม","25–40 คน"] },
+        { id:"f9-relax",     name:"พื้นที่พักผ่อน",            icon:"🌿", color:"#34d399",
+          desc:"พื้นที่พักผ่อน col④–④.3 row D–F",
+          tags:["พักผ่อน"] },
+        { id:"f9-faculty-e", name:"ห้องพักอาจารย์ E",          icon:"👨‍🏫", color:"#ff6b35",
+          desc:"ห้องพักอาจารย์ col①–①.5 row E",
+          tags:["อาจารย์","พัก"] },
+        { id:"f9-faculty-f1",name:"ห้องพักอาจารย์ F1",         icon:"👨‍🏫", color:"#ff6b35",
+          desc:"ห้องพักอาจารย์ col①–①.5 row F",
+          tags:["อาจารย์","พัก"] },
+        { id:"f9-faculty-f2",name:"ห้องพักอาจารย์ F2",         icon:"👨‍🏫", color:"#ff6b35",
+          desc:"ห้องพักอาจารย์ col①.5–② row F",
+          tags:["อาจารย์","พัก"] },
+        { id:"f9-cowork",    name:"Co-working Space 2",        icon:"🖥️", color:"#60a5fa",
+          desc:"Co-working Space 2 col②.5–④ row F\nโต๊ะทำงาน WiFi",
+          tags:["Co-working","WiFi"] },
+        { id:"f9-toilet-f",  name:"ห้องน้ำ (F)",               icon:"🚹🚺", color:"#60a5fa",
+          desc:"ห้องน้ำ col④–④.3 row F ล่าง",
+          tags:["ห้องน้ำ"] },
+      ]
+    },
         { id:"f9-stairs",    name:"บันได (ชั้น 9)",           icon:"🪜", color:"#a78bfa",
           desc:"บันไดหลักเชื่อมชั้น 8–9 และชั้นอื่นๆ",
           tags:["บันได","ฉุกเฉิน"] },
@@ -247,7 +321,7 @@ const MARKER_MAP = {
     <button class="ftab" onclick="switchFloor(9)" id="tab-9">ชั้น 9</button>
   </div>
   <div class="fmap-wrap">
-    <svg id="floor-svg" viewBox="0 0 340 230" xmlns="http://www.w3.org/2000/svg"></svg>
+    <div class="fmap-inner" id="fmap-inner"><svg id="floor-svg" viewBox="0 0 340 230" xmlns="http://www.w3.org/2000/svg"></svg></div>
   </div>
   <div class="rlist" id="room-list"></div>
 </div>
@@ -317,43 +391,125 @@ const FLOOR_MAPS = {
     <rect x="249" y="158" width="45" height="25" rx="0" fill="rgba(244,114,182,0.05)" stroke="rgba(244,114,182,0.2)" stroke-width="0.8"/>
   `,
   9: `
-    <rect x="8" y="8" width="324" height="214" rx="6" fill="none" stroke="rgba(0,255,231,0.22)" stroke-width="1"/>
-    <!-- ทางเดินกลาง -->
-    <rect x="8" y="108" width="324" height="18" fill="rgba(255,255,255,0.025)"/>
-    <text x="170" y="120" text-anchor="middle" font-size="7" fill="rgba(255,255,255,0.18)">— ทางเดิน —</text>
-    <!-- ลิฟท์ + บันได -->
-    <rect x="136" y="50" width="34" height="55" rx="4" fill="rgba(167,139,250,0.14)" stroke="rgba(167,139,250,0.45)" stroke-width="0.8"/>
-    <text x="153" y="74" text-anchor="middle" font-size="8" fill="rgba(167,139,250,0.9)">🔼</text>
-    <text x="153" y="88" text-anchor="middle" font-size="7" fill="rgba(167,139,250,0.7)">ลิฟท์</text>
-    <rect x="173" y="50" width="34" height="55" rx="4" fill="rgba(167,139,250,0.1)" stroke="rgba(167,139,250,0.3)" stroke-width="0.8"/>
-    <text x="190" y="74" text-anchor="middle" font-size="8" fill="rgba(167,139,250,0.75)">🪜</text>
-    <text x="190" y="88" text-anchor="middle" font-size="7" fill="rgba(167,139,250,0.6)">บันได</text>
-    <!-- ฝั่งซ้ายบน -->
-    <!-- แม่บ้าน -->
-    <rect x="8" y="8" width="50" height="40" rx="0" fill="rgba(136,136,136,0.08)" stroke="rgba(136,136,136,0.22)" stroke-width="0.8"/>
-    <text x="33" y="25" text-anchor="middle" font-size="7" fill="rgba(180,180,180,0.7)">🧹</text>
-    <text x="33" y="38" text-anchor="middle" font-size="7" fill="rgba(180,180,180,0.65)">แม่บ้าน</text>
-    <!-- อาจารย์ -->
-    <rect x="60" y="8" width="73" height="40" rx="0" fill="rgba(255,107,53,0.08)" stroke="rgba(255,107,53,0.25)" stroke-width="0.8"/>
-    <text x="96" y="25" text-anchor="middle" font-size="8" fill="rgba(255,107,53,0.8)">👨‍🏫 อาจารย์</text>
-    <!-- ฝั่งขวาบน -->
-    <!-- เจ้าหน้าที่ -->
-    <rect x="210" y="8" width="122" height="40" rx="0" fill="rgba(251,191,36,0.08)" stroke="rgba(251,191,36,0.27)" stroke-width="0.8"/>
-    <text x="271" y="25" text-anchor="middle" font-size="8" fill="rgba(251,191,36,0.8)">👥 ห้องเจ้าหน้าที่</text>
-    <!-- ฝั่งล่าง -->
-    <!-- JK Commons -->
-    <rect x="8" y="128" width="120" height="55" rx="0" fill="rgba(0,255,231,0.09)" stroke="rgba(0,255,231,0.38)" stroke-width="0.9"/>
-    <text x="68" y="148" text-anchor="middle" font-size="8" fill="rgba(0,255,231,0.9)">🎤 JK Commons</text>
-    <text x="68" y="162" text-anchor="middle" font-size="7" fill="rgba(255,255,255,0.35)">25–40 คน</text>
-    <!-- Co-working 2 -->
-    <rect x="130" y="128" width="85" height="55" rx="0" fill="rgba(96,165,250,0.08)" stroke="rgba(96,165,250,0.28)" stroke-width="0.8"/>
-    <text x="172" y="148" text-anchor="middle" font-size="8" fill="rgba(96,165,250,0.85)">🖥️ Co-working 2</text>
-    <!-- กาแฟ -->
-    <rect x="217" y="128" width="55" height="55" rx="0" fill="rgba(251,191,36,0.08)" stroke="rgba(251,191,36,0.28)" stroke-width="0.8"/>
-    <text x="244" y="148" text-anchor="middle" font-size="8" fill="rgba(251,191,36,0.8)">☕ กาแฟ</text>
-    <!-- นักศึกษา -->
-    <rect x="274" y="128" width="58" height="55" rx="0" fill="rgba(52,211,153,0.08)" stroke="rgba(52,211,153,0.28)" stroke-width="0.8"/>
-    <text x="303" y="148" text-anchor="middle" font-size="7" fill="rgba(52,211,153,0.8)">🎓 นักศึกษา</text>
+
+<!-- Col: ①=50 ①.5=122 ②=194 ②.5=266 ③=338 ④=446 ④.3=484 ⑤=554 ⑤.5=581 ⑥=608 end=662 -->
+<!-- Row: A=40 B=171 Bmid=215 C=302 D=365 E=464 F=563 Fmid=603 G=662 -->
+
+<!-- GRID -->
+<line x1="50"  y1="40" x2="50"  y2="662" stroke="#1a2a3a" stroke-width="0.5" stroke-dasharray="3 5"/>
+<line x1="122" y1="40" x2="122" y2="662" stroke="#1a2a3a" stroke-width="0.5" stroke-dasharray="3 5"/>
+<line x1="194" y1="40" x2="194" y2="662" stroke="#1a2a3a" stroke-width="0.5" stroke-dasharray="3 5"/>
+<line x1="266" y1="40" x2="266" y2="662" stroke="#1a2a3a" stroke-width="0.5" stroke-dasharray="3 5"/>
+<line x1="338" y1="40" x2="338" y2="662" stroke="#1a2a3a" stroke-width="0.5" stroke-dasharray="3 5"/>
+<line x1="446" y1="40" x2="446" y2="662" stroke="#1a2a3a" stroke-width="0.5" stroke-dasharray="3 5"/>
+<line x1="484" y1="302" x2="484" y2="662" stroke="#1a2a3a" stroke-width="0.5" stroke-dasharray="3 5"/>
+<line x1="554" y1="40" x2="554" y2="662" stroke="#1a2a3a" stroke-width="0.5" stroke-dasharray="3 5"/>
+<line x1="581" y1="40" x2="581" y2="662" stroke="#1a2a3a" stroke-width="0.5" stroke-dasharray="3 5"/>
+<line x1="608" y1="40" x2="608" y2="662" stroke="#1a2a3a" stroke-width="0.5" stroke-dasharray="3 5"/>
+<line x1="50" y1="40"  x2="662" y2="40"  stroke="#1a2a3a" stroke-width="0.5" stroke-dasharray="3 5"/>
+<line x1="50" y1="171" x2="662" y2="171" stroke="#1a2a3a" stroke-width="0.5" stroke-dasharray="3 5"/>
+<line x1="50" y1="215" x2="662" y2="215" stroke="#1a2a3a" stroke-width="0.3" stroke-dasharray="2 6" opacity="0.5"/>
+<line x1="50" y1="302" x2="662" y2="302" stroke="#1a2a3a" stroke-width="0.5" stroke-dasharray="3 5"/>
+<line x1="50" y1="365" x2="662" y2="365" stroke="#1a2a3a" stroke-width="0.5" stroke-dasharray="3 5"/>
+<line x1="50" y1="464" x2="662" y2="464" stroke="#1a2a3a" stroke-width="0.5" stroke-dasharray="3 5"/>
+<line x1="50" y1="563" x2="662" y2="563" stroke="#1a2a3a" stroke-width="0.5" stroke-dasharray="3 5"/>
+<line x1="50" y1="603" x2="484" y2="603" stroke="#1a2a3a" stroke-width="0.3" stroke-dasharray="2 6" opacity="0.5"/>
+<line x1="50" y1="662" x2="662" y2="662" stroke="#1a2a3a" stroke-width="0.5" stroke-dasharray="3 5"/>
+<line x1="50" y1="105" x2="122" y2="105" stroke="#2a3a4a" stroke-width="1"/>
+
+<!-- LABELS -->
+<text x="50"  y="30" text-anchor="middle" font-size="10" fill="#00ffe7" font-weight="600">①</text>
+<text x="122" y="30" text-anchor="middle" font-size="8"  fill="#4a6a8a">①.5</text>
+<text x="194" y="30" text-anchor="middle" font-size="10" fill="#00ffe7" font-weight="600">②</text>
+<text x="266" y="30" text-anchor="middle" font-size="8"  fill="#4a6a8a">②.5</text>
+<text x="338" y="30" text-anchor="middle" font-size="10" fill="#00ffe7" font-weight="600">③</text>
+<text x="446" y="30" text-anchor="middle" font-size="10" fill="#00ffe7" font-weight="600">④</text>
+<text x="484" y="294" text-anchor="middle" font-size="7" fill="#4a6a8a">④.3</text>
+<text x="554" y="30" text-anchor="middle" font-size="10" fill="#00ffe7" font-weight="600">⑤</text>
+<text x="581" y="30" text-anchor="middle" font-size="8"  fill="#4a6a8a">⑤.5</text>
+<text x="608" y="30" text-anchor="middle" font-size="10" fill="#00ffe7" font-weight="600">⑥</text>
+<text x="36" y="106" text-anchor="middle" font-size="10" fill="#4a6a8a">A</text>
+<text x="36" y="193" text-anchor="middle" font-size="10" fill="#4a6a8a">B</text>
+<text x="36" y="333" text-anchor="middle" font-size="10" fill="#4a6a8a">C</text>
+<text x="36" y="413" text-anchor="middle" font-size="10" fill="#4a6a8a">D</text>
+<text x="36" y="513" text-anchor="middle" font-size="10" fill="#4a6a8a">E</text>
+<text x="36" y="612" text-anchor="middle" font-size="10" fill="#4a6a8a">F</text>
+
+<!-- ไม่มีพื้นที่ -->
+<rect x="484" y="365" width="178" height="297" fill="rgba(0,0,0,0.4)" stroke="none"/>
+<text x="571" y="513" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.1)">— ไม่มีพื้นที่ —</text>
+
+<!-- ══ โถงทางเดิน ══ -->
+<rect x="194" y="40" width="72" height="523" fill="rgba(0,255,231,0.05)" stroke="rgba(0,255,231,0.4)" stroke-width="1.5" stroke-dasharray="5 3"/>
+<text x="230" y="290" text-anchor="middle" font-size="9" fill="rgba(0,255,231,0.6)">โถง</text>
+<rect x="122" y="40" width="72" height="33" fill="rgba(0,255,231,0.07)" stroke="rgba(0,255,231,0.4)" stroke-width="1" stroke-dasharray="3 2"/>
+<text x="158" y="57" text-anchor="middle" font-size="8" fill="rgba(0,255,231,0.7)">โถงเล็ก</text>
+<rect x="50"  y="171" width="144" height="131" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.15)" stroke-width="1" stroke-dasharray="4 2"/>
+<text x="122" y="237" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.3)">ทางเดิน</text>
+<rect x="194" y="171" width="468" height="44" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.12)" stroke-width="1" stroke-dasharray="4 2"/>
+<text x="430" y="193" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.25)">— ทางเดินหลัก 1/3 —</text>
+<rect x="554" y="215" width="27" height="150" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.12)" stroke-width="1" stroke-dasharray="3 2"/>
+
+
+<rect x="122" y="563" width="18" height="99"  fill="rgba(255,255,255,0.06)" stroke="rgba(0,255,231,0.3)" stroke-width="1" stroke-dasharray="2 2"/>
+
+<!-- ══ ROW A ══ -->
+<g class="room"><rect x="50"  y="40" width="72" height="65" fill="#1a3a6a" stroke="#4a8abf" stroke-width="0.8"/><text x="86"  y="62" text-anchor="middle" class="lbl th">🚹🚺</text><text x="86"  y="78" text-anchor="middle" class="lbl ts">ห้องน้ำ</text></g>
+<g class="room"><rect x="50"  y="105" width="72" height="66" fill="#2a2a2a" stroke="#888" stroke-width="0.8"/><text x="86"  y="124" text-anchor="middle" class="lbl th">📦</text><text x="86"  y="140" text-anchor="middle" class="lbl ts">เก็บของแม่บ้าน</text></g>
+<g class="room"><rect x="122" y="73" width="72" height="98" fill="#3a2a0a" stroke="#d97706" stroke-width="0.8"/><text x="158" y="110" text-anchor="middle" class="lbl th">🔼🔼🔼</text><text x="158" y="130" text-anchor="middle" class="lbl ts">ลิฟท์ ×3</text></g>
+<g class="room"><rect x="266" y="40" width="234" height="131" fill="#0a2a2a" stroke="#0d9488" stroke-width="0.8"/><text x="383" y="98" text-anchor="middle" class="lbl th">🏢 THOHUN</text><text x="383" y="116" text-anchor="middle" class="lbl ts">สำนักงาน</text></g>
+<g class="room"><rect x="446" y="40" width="135" height="131" fill="#2a2a2a" stroke="#888" stroke-width="0.8"/><text x="513" y="98" text-anchor="middle" class="lbl th">🧹 ห้องแม่บ้าน</text></g>
+<g class="room"><rect x="581" y="40" width="81" height="131" fill="#3a0a0a" stroke="#dc2626" stroke-width="0.8"/><text x="621" y="78" text-anchor="middle" class="lbl th">🚨 บันได</text><text x="621" y="96" text-anchor="middle" class="lbl ts">หนีไฟ</text></g>
+
+<!-- ══ ROW B ล่าง ══ -->
+<g class="room"><rect x="50"  y="215" width="72" height="87" fill="#2a2a2a" stroke="#888" stroke-width="0.8"/><text x="86"  y="252" text-anchor="middle" class="lbl th">🪜</text><text x="86"  y="270" text-anchor="middle" class="lbl ts">บันไดในอาคาร</text></g>
+<g class="room"><rect x="266" y="215" width="180" height="87" fill="#3a1a00" stroke="#d97706" stroke-width="0.8"/><text x="356" y="259" text-anchor="middle" class="lbl th">👥 ห้องเจ้าหน้าที่</text></g>
+<g class="room"><rect x="446" y="215" width="108" height="87" fill="#0a2a2a" stroke="#0d9488" stroke-width="0.8"/><text x="500" y="250" text-anchor="middle" class="lbl th">🎓</text><text x="500" y="268" text-anchor="middle" class="lbl ts">ห้องพักนักศึกษา</text></g>
+<g class="room"><rect x="581" y="215" width="81" height="87" fill="#1a3a6a" stroke="#4a8abf" stroke-width="0.8"/><text x="621" y="259" text-anchor="middle" class="lbl th">🚹🚺 ห้องน้ำ</text></g>
+
+<!-- ประตูทางเข้า col②–②.5 row B -->
+<g class="room"><rect x="194" y="215" width="72" height="29" fill="#0a1a0a" stroke="#22c55e" stroke-width="1.5"/><text x="230" y="233" text-anchor="middle" class="lbl th">🚪 ประตูทางเข้า</text></g>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- ประตูแนวตั้ง col②.5 ในทางเดินหลัก h=44 -->
+<rect x="258" y="171" width="16" height="44" fill="#0a3a0a" stroke="#22c55e" stroke-width="2"/>
+<text x="266" y="193" text-anchor="middle" transform="rotate(-90,266,193)" style="font-size:7px;fill:#22c55e;font-weight:600">🚪 ประตู</text>
+
+<!-- ══ ROW C ══ -->
+<g class="room"><rect x="50" y="302" width="72" height="63" fill="#0a2a0a" stroke="#16a34a" stroke-width="0.8"/><text x="86" y="333" text-anchor="middle" class="lbl th">👨‍🏫 ห้องพัก อ.1</text></g>
+<g class="room"><rect x="122" y="302" width="72" height="63" fill="#0a2a0a" stroke="#16a34a" stroke-width="0.8"/><text x="158" y="333" text-anchor="middle" class="lbl th">👨‍🏫 ห้องพัก อ.2</text></g>
+<g class="room"><rect x="266" y="302" width="180" height="63" fill="#3a1a00" stroke="#d97706" stroke-width="0.8"/><text x="356" y="333" text-anchor="middle" class="lbl th">👥 ห้องเจ้าหน้าที่</text></g>
+<g class="room"><rect x="446" y="302" width="108" height="63" fill="#0a2a0a" stroke="#16a34a" stroke-width="0.8"/><text x="500" y="333" text-anchor="middle" class="lbl th">👨‍🏫 ห้องพัก อ.</text></g>
+<g class="room"><rect x="581" y="302" width="81" height="63" fill="#0a2a0a" stroke="#16a34a" stroke-width="0.8"/><text x="621" y="333" text-anchor="middle" class="lbl th">👨‍🏫 ห้องพัก อ.</text></g>
+
+<g class="room"><rect x="122" y="365" width="72" height="198" fill="#0a2a0a" stroke="#16a34a" stroke-width="0.8"/><text x="158" y="445" text-anchor="middle" class="lbl th">🌿</text><text x="158" y="465" text-anchor="middle" class="lbl ts">พักผ่อน</text></g>
+
+<!-- ══ ROW D ══ -->
+<g class="room"><rect x="50"  y="365" width="72" height="99" fill="#0a2a0a" stroke="#16a34a" stroke-width="0.8"/><text x="86"  y="400" text-anchor="middle" class="lbl th">👨‍🏫</text><text x="86"  y="418" text-anchor="middle" class="lbl ts">ห้องพัก อ.D</text></g>
+<g class="room"><rect x="266" y="365" width="180" height="198" fill="#1a0a2a" stroke="#7c3aed" stroke-width="0.8"/><text x="356" y="445" text-anchor="middle" class="lbl th">🎤</text><text x="356" y="465" text-anchor="middle" class="lbl th">JK Commons</text><text x="356" y="483" text-anchor="middle" class="lbl ts">25–40 คน</text></g>
+<g class="room"><rect x="446" y="365" width="38" height="238" fill="#0a2a0a" stroke="#16a34a" stroke-width="0.8"/><text x="465" y="460" text-anchor="middle" class="lbl th">🌿</text><text x="465" y="480" text-anchor="middle" class="lbl ts" style="font-size:8px">พักผ่อน</text></g>
+
+<!-- ══ ROW E ══ -->
+<g class="room"><rect x="50"  y="464" width="72" height="99" fill="#0a2a0a" stroke="#16a34a" stroke-width="0.8"/><text x="86"  y="500" text-anchor="middle" class="lbl th">👨‍🏫</text><text x="86"  y="518" text-anchor="middle" class="lbl ts">ห้องพัก อ.E</text></g>
+
+<!-- ══ ROW F ══ -->
+<g class="room"><rect x="50"  y="563" width="72" height="99" fill="#0a2a0a" stroke="#16a34a" stroke-width="0.8"/><text x="86"  y="598" text-anchor="middle" class="lbl th">👨‍🏫</text><text x="86"  y="616" text-anchor="middle" class="lbl ts">ห้องพัก อ.F1</text></g>
+<g class="room"><rect x="140" y="563" width="54" height="99" fill="#0a2a0a" stroke="#16a34a" stroke-width="0.8"/><text x="167" y="598" text-anchor="middle" class="lbl th">👨‍🏫</text><text x="167" y="616" text-anchor="middle" class="lbl ts">ห้องพัก อ.F2</text></g>
+<g class="room"><rect x="266" y="563" width="180" height="99" fill="#1a2a4a" stroke="#3b82f6" stroke-width="0.8"/><text x="356" y="596" text-anchor="middle" class="lbl th">🖥️ Co-working Space 2</text><text x="356" y="614" text-anchor="middle" class="lbl ts">col②.5–④</text></g>
+<g class="room"><rect x="446" y="603" width="38" height="59" fill="#1a3a6a" stroke="#4a8abf" stroke-width="0.8"/><text x="465" y="625" text-anchor="middle" class="lbl th">🚹🚺</text><text x="465" y="645" text-anchor="middle" class="lbl ts" style="font-size:7px">ห้องน้ำ</text></g>
+
   `
 };
 
@@ -507,6 +663,29 @@ function buildQRGrid() {
   note.textContent = 'ดาวน์โหลด Hiro/Kanji/Letter marker จาก ar-js-org.github.io/AR.js เพื่อพิมพ์ติดหน้าห้อง';
   grid.appendChild(note);
 }
+</script>
+
+<script>
+// Pinch zoom for floor map
+(function(){
+  const wrap = document.querySelector('.fmap-wrap');
+  if(!wrap) return;
+  let scale=1, tx=0, ty=0, isPan=false, startX, startY, lastDist, lastScale;
+  function getInner(){ return document.getElementById('fmap-inner'); }
+  function setT(){ const el=getInner(); if(el) el.style.transform=`translate(${tx}px,${ty}px) scale(${scale})`; }
+  wrap.addEventListener('touchstart',e=>{
+    const el=getInner(); if(!el) return;
+    if(e.touches.length===2){ lastDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY); lastScale=scale; isPan=false; }
+    else if(e.touches.length===1){ isPan=true; startX=e.touches[0].clientX-tx; startY=e.touches[0].clientY-ty; }
+  },{passive:true});
+  wrap.addEventListener('touchmove',e=>{
+    e.preventDefault();
+    if(e.touches.length===2){ const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY); scale=Math.min(5,Math.max(0.3,lastScale*(d/lastDist))); setT(); }
+    else if(e.touches.length===1&&isPan){ tx=e.touches[0].clientX-startX; ty=e.touches[0].clientY-startY; setT(); }
+  },{passive:false});
+  let lastTap=0;
+  wrap.addEventListener('touchend',e=>{ const now=Date.now(); if(now-lastTap<300){scale=1;tx=0;ty=0;setT();} lastTap=now; });
+})();
 </script>
 </body>
 </html>
