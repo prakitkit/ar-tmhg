@@ -398,51 +398,19 @@ const MARKER_MAP = {
 const FLOOR_MAPS = {
   8: `
     <rect x="8" y="8" width="324" height="214" rx="6" fill="none" stroke="rgba(0,255,231,0.22)" stroke-width="1"/>
-    <!-- ทางเดินกลาง -->
     <rect x="8" y="108" width="324" height="18" fill="rgba(255,255,255,0.025)"/>
     <text x="170" y="120" text-anchor="middle" font-size="7" fill="rgba(255,255,255,0.18)">— ทางเดิน —</text>
-    <!-- ลิฟท์ + บันได (กลาง) -->
-    <rect x="136" y="50" width="34" height="55" rx="4" fill="rgba(167,139,250,0.14)" stroke="rgba(167,139,250,0.45)" stroke-width="0.8"/>
-    <text x="153" y="74" text-anchor="middle" font-size="8" fill="rgba(167,139,250,0.9)">🔼</text>
-    <text x="153" y="88" text-anchor="middle" font-size="7" fill="rgba(167,139,250,0.7)">ลิฟท์</text>
-    <rect x="173" y="50" width="34" height="55" rx="4" fill="rgba(167,139,250,0.1)" stroke="rgba(167,139,250,0.3)" stroke-width="0.8"/>
-    <text x="190" y="74" text-anchor="middle" font-size="8" fill="rgba(167,139,250,0.75)">🪜</text>
-    <text x="190" y="88" text-anchor="middle" font-size="7" fill="rgba(167,139,250,0.6)">บันได</text>
-    <!-- ฝั่งซ้ายบน -->
-    <!-- แม่บ้าน -->
-    <rect x="8" y="8" width="55" height="40" rx="0" fill="rgba(136,136,136,0.08)" stroke="rgba(136,136,136,0.25)" stroke-width="0.8"/>
-    <text x="35" y="25" text-anchor="middle" font-size="7" fill="rgba(180,180,180,0.7)">🧹</text>
-    <text x="35" y="38" text-anchor="middle" font-size="7" fill="rgba(180,180,180,0.65)">แม่บ้าน</text>
-    <!-- อาจารย์ -->
-    <rect x="63" y="8" width="70" height="40" rx="0" fill="rgba(255,107,53,0.08)" stroke="rgba(255,107,53,0.25)" stroke-width="0.8"/>
-    <text x="98" y="25" text-anchor="middle" font-size="8" fill="rgba(255,107,53,0.8)">👨‍🏫 อาจารย์</text>
-    <!-- ฝั่งขวาบน -->
-    <!-- เลขา -->
-    <rect x="210" y="8" width="70" height="40" rx="0" fill="rgba(0,255,231,0.07)" stroke="rgba(0,255,231,0.28)" stroke-width="0.8"/>
-    <text x="245" y="25" text-anchor="middle" font-size="8" fill="rgba(0,255,231,0.8)">📋 เลขาภาควิชา</text>
-    <!-- หัวหน้าภาค -->
-    <rect x="282" y="8" width="50" height="40" rx="0" fill="rgba(251,191,36,0.09)" stroke="rgba(251,191,36,0.3)" stroke-width="0.8"/>
-    <text x="307" y="22" text-anchor="middle" font-size="7" fill="rgba(251,191,36,0.85)">🏅 หัวหน้า</text>
-    <text x="307" y="35" text-anchor="middle" font-size="7" fill="rgba(251,191,36,0.7)">ภาค</text>
-    <!-- ฝั่งซ้ายล่าง -->
-    <!-- กินข้าว -->
-    <rect x="8" y="128" width="65" height="55" rx="0" fill="rgba(52,211,153,0.08)" stroke="rgba(52,211,153,0.28)" stroke-width="0.8"/>
-    <text x="40" y="150" text-anchor="middle" font-size="8" fill="rgba(52,211,153,0.8)">🍱 กินข้าว</text>
-    <!-- Co-working 1 -->
-    <rect x="75" y="128" width="80" height="55" rx="0" fill="rgba(96,165,250,0.08)" stroke="rgba(96,165,250,0.3)" stroke-width="0.8"/>
-    <text x="115" y="151" text-anchor="middle" font-size="8" fill="rgba(96,165,250,0.85)">💻 Co-working 1</text>
-    <!-- ห้องประชุม -->
-    <rect x="157" y="128" width="90" height="55" rx="0" fill="rgba(255,107,53,0.09)" stroke="rgba(255,107,53,0.3)" stroke-width="0.8"/>
-    <text x="202" y="151" text-anchor="middle" font-size="8" fill="rgba(255,107,53,0.85)">🏛️ ประชุม</text>
-    <text x="202" y="165" text-anchor="middle" font-size="7" fill="rgba(255,255,255,0.3)">20 คน</text>
-    <!-- ฟิตเนส -->
-    <rect x="249" y="128" width="45" height="28" rx="0" fill="rgba(239,68,68,0.08)" stroke="rgba(239,68,68,0.28)" stroke-width="0.8"/>
-    <text x="271" y="145" text-anchor="middle" font-size="7" fill="rgba(239,68,68,0.8)">🏋️ ฟิตเนส</text>
-    <!-- Studio -->
-    <rect x="296" y="128" width="36" height="55" rx="0" fill="rgba(244,114,182,0.08)" stroke="rgba(244,114,182,0.28)" stroke-width="0.8"/>
-    <text x="314" y="148" text-anchor="middle" font-size="7" fill="rgba(244,114,182,0.8)">🎬</text>
-    <text x="314" y="161" text-anchor="middle" font-size="7" fill="rgba(244,114,182,0.7)">Studio</text>
-    <rect x="249" y="158" width="45" height="25" rx="0" fill="rgba(244,114,182,0.05)" stroke="rgba(244,114,182,0.2)" stroke-width="0.8"/>
+    <g class="room" data-id="f8-lift"><rect x="136" y="50" width="34" height="55" rx="4" fill="rgba(167,139,250,0.14)" stroke="rgba(167,139,250,0.45)" stroke-width="0.8"/><text x="153" y="74" text-anchor="middle" class="lbl th">🔼</text><text x="153" y="88" text-anchor="middle" class="lbl ts">ลิฟท์</text></g>
+    <g class="room" data-id="f8-stairs"><rect x="173" y="50" width="34" height="55" rx="4" fill="rgba(167,139,250,0.1)" stroke="rgba(167,139,250,0.3)" stroke-width="0.8"/><text x="190" y="74" text-anchor="middle" class="lbl th">🪜</text><text x="190" y="88" text-anchor="middle" class="lbl ts">บันได</text></g>
+    <g class="room" data-id="f8-maid"><rect x="8" y="8" width="55" height="40" fill="rgba(136,136,136,0.08)" stroke="rgba(136,136,136,0.25)" stroke-width="0.8"/><text x="35" y="24" text-anchor="middle" class="lbl th">🧹</text><text x="35" y="38" text-anchor="middle" class="lbl ts">แม่บ้าน</text></g>
+    <g class="room" data-id="f8-faculty"><rect x="63" y="8" width="70" height="40" fill="rgba(255,107,53,0.08)" stroke="rgba(255,107,53,0.25)" stroke-width="0.8"/><text x="98" y="24" text-anchor="middle" class="lbl th">👨‍🏫</text><text x="98" y="38" text-anchor="middle" class="lbl ts">อาจารย์</text></g>
+    <g class="room" data-id="f8-secretary"><rect x="140" y="8" width="68" height="40" fill="rgba(0,255,231,0.07)" stroke="rgba(0,255,231,0.28)" stroke-width="0.8"/><text x="174" y="24" text-anchor="middle" class="lbl th">📋</text><text x="174" y="38" text-anchor="middle" class="lbl ts">เลขาภาควิชา</text></g>
+    <g class="room" data-id="f8-head"><rect x="282" y="8" width="50" height="40" fill="rgba(251,191,36,0.09)" stroke="rgba(251,191,36,0.3)" stroke-width="0.8"/><text x="307" y="24" text-anchor="middle" class="lbl th">🏅</text><text x="307" y="38" text-anchor="middle" class="lbl ts">หัวหน้าภาค</text></g>
+    <g class="room" data-id="f8-dining"><rect x="8" y="128" width="65" height="55" fill="rgba(52,211,153,0.08)" stroke="rgba(52,211,153,0.28)" stroke-width="0.8"/><text x="40" y="150" text-anchor="middle" class="lbl th">🍱</text><text x="40" y="165" text-anchor="middle" class="lbl ts">กินข้าว</text></g>
+    <g class="room" data-id="f8-cowork"><rect x="75" y="128" width="80" height="55" fill="rgba(96,165,250,0.08)" stroke="rgba(96,165,250,0.3)" stroke-width="0.8"/><text x="115" y="150" text-anchor="middle" class="lbl th">💻</text><text x="115" y="165" text-anchor="middle" class="lbl ts">Co-working 1</text></g>
+    <g class="room" data-id="f8-meeting"><rect x="157" y="128" width="90" height="55" fill="rgba(255,107,53,0.09)" stroke="rgba(255,107,53,0.3)" stroke-width="0.8"/><text x="202" y="150" text-anchor="middle" class="lbl th">🏛️</text><text x="202" y="165" text-anchor="middle" class="lbl ts">ประชุม 20 คน</text></g>
+    <g class="room" data-id="f8-fitness"><rect x="249" y="128" width="45" height="28" fill="rgba(239,68,68,0.08)" stroke="rgba(239,68,68,0.28)" stroke-width="0.8"/><text x="271" y="146" text-anchor="middle" class="lbl th">🏋️ ฟิตเนส</text></g>
+    <g class="room" data-id="f8-studio"><rect x="249" y="158" width="83" height="25" fill="rgba(244,114,182,0.05)" stroke="rgba(244,114,182,0.2)" stroke-width="0.8"/><text x="290" y="174" text-anchor="middle" class="lbl th">🎬 Studio</text></g>
   `,
   9: `
 
