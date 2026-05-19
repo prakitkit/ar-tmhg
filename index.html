@@ -72,7 +72,7 @@ a-scene{width:100%!important;height:100%!important;}
 .room{cursor:pointer;}.room rect{transition:filter 0.15s;}.room:hover rect{filter:brightness(1.4);}
 .room.selected rect{filter:brightness(2) drop-shadow(0 0 6px #00ffe7);}
 .lbl{font-family:'Sarabun',sans-serif;pointer-events:none;}.th{font-size:11px;font-weight:600;fill:#fff;}.ts{font-size:9px;fill:rgba(255,255,255,0.6);}
-#dest-bar{display:none;position:fixed;top:0;left:0;right:0;z-index:70;background:rgba(10,14,26,0.97);border-bottom:1px solid rgba(0,255,231,0.3);padding:10px 14px;display:flex;align-items:center;gap:10px;}
+#dest-bar{display:flex;position:fixed;top:0;left:0;right:0;z-index:70;background:rgba(10,14,26,0.97);border-bottom:1px solid rgba(0,255,231,0.3);padding:10px 14px;align-items:center;gap:10px;}
 #dest-bar.hidden{display:none!important;}
 #dest-room-name{flex:1;font-size:14px;font-weight:700;color:#fff;}
 #dest-cancel{background:none;border:1px solid rgba(255,255,255,0.2);border-radius:20px;padding:4px 12px;color:rgba(255,255,255,0.5);font-size:11px;cursor:pointer;}
@@ -678,7 +678,12 @@ function renderFloorMap(f) {
   svg.setAttribute('viewBox', FLOOR_VIEWBOX[f] || '0 0 340 230');
   svg.innerHTML = FLOOR_MAPS[f] || '';
   svg.querySelectorAll('.room[data-id]').forEach(g => {
-    g.addEventListener('click', () => { selectDest(g.dataset.id); showRoom(g.dataset.id); });
+    g.addEventListener('click', () => {
+      const id = g.dataset.id;
+      selectDest(id);
+      closeMap();
+      showRoom(id);
+    });
   });
   // re-place pin if a dest is already selected on this floor
   if (destRoom) placePin(destRoom.id);
