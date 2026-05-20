@@ -344,8 +344,8 @@ const MARKER_MAP = {
     </div>
   </div>
   <div class="ftabs">
-    <button class="ftab active" onclick="switchFloor(8)" id="tab-8">ชั้น 8</button>
-    <button class="ftab" onclick="switchFloor(9)" id="tab-9">ชั้น 9</button>
+    <button class="ftab" onclick="switchFloor(8)" id="tab-8" style="display:none">ชั้น 8</button>
+    <button class="ftab active" onclick="switchFloor(9)" id="tab-9">ชั้น 9</button>
   </div>
   <div class="fmap-wrap">
     <div class="fmap-inner" id="fmap-inner"><svg id="floor-svg" viewBox="0 0 340 230" xmlns="http://www.w3.org/2000/svg"></svg></div>
@@ -534,7 +534,7 @@ const FLOOR_MAPS = {
   `
 };
 
-let currentFloor = 8;
+let currentFloor = 9;
 
 function startApp() {
   document.getElementById('perm-screen').style.display = 'none';
