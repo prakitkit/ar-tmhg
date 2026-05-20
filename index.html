@@ -353,6 +353,11 @@ const MARKER_MAP = {
     <span id="here-room-name" style="color:#fbbf24;font-weight:700;flex:1">—</span>
     <button onclick="clearHere()" style="background:none;border:none;color:rgba(255,255,255,0.3);font-size:16px;cursor:pointer;padding:0;line-height:1">✕</button>
   </div>
+  <div id="path-dist" style="display:none;align-items:center;gap:8px;background:rgba(0,255,231,0.05);border:1px solid rgba(0,255,231,0.15);border-radius:10px;padding:7px 12px;margin-bottom:10px;font-size:12px;">
+    <span style="color:#00ffe7">🚶</span>
+    <span style="color:rgba(255,255,255,0.45)">ระยะทาง:</span>
+    <span id="path-dist-val" style="color:#00ffe7;font-weight:700">—</span>
+  </div>
   <div class="fmap-wrap">
     <div class="fmap-inner" id="fmap-inner"><svg id="floor-svg" viewBox="0 0 340 230" xmlns="http://www.w3.org/2000/svg"></svg></div>
   </div>
@@ -758,6 +763,20 @@ function placeHerePin(id) {
   svg.appendChild(pin);
 }
 
+// ── SCALE: SVG units → เมตรจริง ──
+// ชั้น 9: grid x=50–662 (612 units=33 ม.), y=40–662 (622 units=37.5 ม.)
+const F9_SCALE = { x: 33/612, y: 37.5/622 };
+
+function svgDist(pts, scale) {
+  let d = 0;
+  for (let i = 1; i < pts.length; i++) {
+    const dx = (pts[i].x - pts[i-1].x) * scale.x;
+    const dy = (pts[i].y - pts[i-1].y) * scale.y;
+    d += Math.sqrt(dx*dx + dy*dy);
+  }
+  return d;
+}
+
 // ── CORRIDOR GRAPH — ชั้น 9 ──
 const F9_NODES = {
   'c-top':  {x:230, y:55},   // ปากโถงบน (ใกล้ THOHUN)
@@ -851,6 +870,16 @@ function drawPathLine() {
   pl.setAttribute('stroke-linejoin', 'round');
   pl.setAttribute('opacity', '0.85');
   svg.insertBefore(pl, svg.firstChild);
+
+  // คำนวณและแสดงระยะทางจริง
+  const scale = currentFloor===9 ? F9_SCALE : null;
+  const distBar = document.getElementById('path-dist');
+  const distVal = document.getElementById('path-dist-val');
+  if (scale && distBar && distVal) {
+    const metres = svgDist(pts, scale);
+    distVal.textContent = `~${Math.round(metres)} ม. (${Math.ceil(metres/1.2)} วินาที เดิน)`;
+    distBar.style.display = 'flex';
+  }
 }
 
 function updateHereBar() {
@@ -864,9 +893,9 @@ function updateHereBar() {
 function clearHere() {
   hereRoom = null;
   updateHereBar();
-  const svg = document.getElementById('floor-svg');
   const p = document.getElementById('map-here-pin'); if(p) p.remove();
   const l = document.getElementById('map-path-line'); if(l) l.remove();
+  const d = document.getElementById('path-dist'); if(d) d.style.display='none';
 }
 
 function setHere(id) {
@@ -1048,6 +1077,8 @@ function cancelDest(){
   document.querySelectorAll('.room').forEach(r=>r.classList.remove('selected'));
   document.getElementById('dest-bar').classList.add('hidden');
   placePin(null);
+  const l = document.getElementById('map-path-line'); if(l) l.remove();
+  const d = document.getElementById('path-dist'); if(d) d.style.display='none';
 }
 
 // ── FLOOR 8 COORDS ──
