@@ -660,8 +660,12 @@ function renderFloorMap(f) {
     g.addEventListener('click', () => {
       const id = g.dataset.id;
       selectDest(id);
-      closeMap();
-      showRoom(id);
+      if (hereRoom) {
+        // มี "ที่นี่" — คงแผนที่ไว้ให้เห็นเส้นทาง
+      } else {
+        closeMap();
+        showRoom(id);
+      }
     });
   });
   if (destRoom) placePin(destRoom.id);
@@ -927,7 +931,7 @@ function renderRoomList(f) {
         <div class="ri-desc">${room.desc.split('\n')[0]}</div>
       </div>
       <div class="ri-fl">${floor.label}</div>`;
-    item.onclick = () => { selectDest(room.id); closeMap(); showRoom(room.id); };
+    item.onclick = () => { selectDest(room.id); if(hereRoom){ /* คงแผนที่ไว้ */ } else { closeMap(); showRoom(room.id); } };
     container.appendChild(item);
   });
 }
@@ -1063,6 +1067,7 @@ function selectDest(id){
   document.getElementById('dest-room-name').textContent=c.name;
   document.getElementById('dest-bar').classList.remove('hidden');
   placePin(id);
+  drawPathLine();
   updateDestDist();
 }
 
