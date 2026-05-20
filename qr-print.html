@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QR Print — อาคารตระหนักจิตร ชั้น 9</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Sarabun','Segoe UI',sans-serif;background:#f5f5f5;padding:20px;}
+h1{font-size:18px;font-weight:700;margin-bottom:4px;color:#111;}
+.subtitle{font-size:12px;color:#666;margin-bottom:16px;}
+.no-print{display:flex;gap:10px;margin-bottom:20px;align-items:center;flex-wrap:wrap;}
+.btn-print{background:#0a0e1a;color:#00ffe7;border:none;border-radius:8px;padding:10px 24px;font-size:14px;font-weight:700;cursor:pointer;}
+.btn-print:hover{background:#1a2030;}
+.base-url-row{display:flex;align-items:center;gap:8px;font-size:12px;color:#444;}
+.base-url-row input{border:1px solid #ccc;border-radius:6px;padding:5px 10px;font-size:12px;width:340px;}
+.floor-section{margin-bottom:28px;}
+.floor-title{font-size:14px;font-weight:700;color:#0a0e1a;background:#e8f4ff;border-left:4px solid #0a0e1a;padding:6px 12px;margin-bottom:12px;border-radius:0 6px 6px 0;}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.card{background:#fff;border:1px solid #ddd;border-radius:10px;padding:12px 8px 10px;display:flex;flex-direction:column;align-items:center;gap:6px;break-inside:avoid;}
+.qr-box{width:130px;height:130px;flex-shrink:0;}
+.room-icon{font-size:22px;margin-top:2px;}
+.room-name{font-size:11px;font-weight:700;text-align:center;color:#111;line-height:1.4;}
+.room-floor{font-size:10px;color:#888;}
+.room-id{font-size:9px;color:#aaa;font-family:monospace;}
+
+@media print {
+  body{background:#fff;padding:10px;}
+  .no-print{display:none!important;}
+  .floor-section{margin-bottom:20px;}
+  .grid{grid-template-columns:repeat(4,1fr);gap:8px;}
+  .card{border:1px solid #ccc;border-radius:8px;padding:10px 6px 8px;}
+  .qr-box{width:120px;height:120px;}
+  @page{size:A4;margin:15mm 10mm;}
+}
+</style>
+</head>
+<body>
+
+<div class="no-print">
+  <div>
+    <h1>🖨️ พิมพ์ QR ติดหน้าห้อง — อาคารตระหนักจิตร</h1>
+    <div class="subtitle">scan QR ด้วยกล้องปกติ → แอปรู้จุดปัจจุบันทันที</div>
+  </div>
+  <button class="btn-print" onclick="window.print()">🖨️ พิมพ์ / Save PDF</button>
+</div>
+<div class="no-print base-url-row">
+  <span>Base URL:</span>
+  <input type="text" id="base-url-input" placeholder="https://prakitkit.github.io/ar-tmhg/">
+  <button onclick="rebuild()" style="background:#333;color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;">อัปเดต QR</button>
+</div>
+
+<div id="content"></div>
+
+<script>
+const BUILDING_FLOORS = {
+  9: {
+    label: "ชั้น 9",
+    rooms: [
+      { id:"f9-lift",       name:"ลิฟท์ ×3",               icon:"🔼" },
+      { id:"f9-toilet-a",   name:"ห้องน้ำ (A)",             icon:"🚹🚺" },
+      { id:"f9-storage",    name:"ห้องเก็บของแม่บ้าน",      icon:"📦" },
+      { id:"f9-maid",       name:"ห้องแม่บ้าน",             icon:"🧹" },
+      { id:"f9-thohun",     name:"สำนักงาน THOHUN",          icon:"🏢" },
+      { id:"f9-fire",       name:"บันไดหนีไฟ",              icon:"🚨" },
+      { id:"f9-stairs",     name:"บันไดในอาคาร",            icon:"🪜" },
+      { id:"f9-door1",      name:"ประตูทางเข้า 1",          icon:"🚪" },
+      { id:"f9-door2",      name:"ประตูทางเข้า 2",          icon:"🚪" },
+      { id:"f9-staff-b",    name:"ห้องเจ้าหน้าที่ (B)",    icon:"👥" },
+      { id:"f9-student",    name:"ห้องพักนักศึกษา",         icon:"🎓" },
+      { id:"f9-toilet-b",   name:"ห้องน้ำ (B)",             icon:"🚹🚺" },
+      { id:"f9-faculty-c1", name:"ห้องพักอาจารย์ C1",      icon:"👨‍🏫" },
+      { id:"f9-faculty-c2", name:"ห้องพักอาจารย์ C2",      icon:"👨‍🏫" },
+      { id:"f9-staff-c",    name:"ห้องเจ้าหน้าที่ (C)",    icon:"👥" },
+      { id:"f9-faculty-c3", name:"ห้องพักอาจารย์ C3",      icon:"👨‍🏫" },
+      { id:"f9-faculty-c4", name:"ห้องพักอาจารย์ C4",      icon:"👨‍🏫" },
+      { id:"f9-faculty-d",  name:"ห้องพักอาจารย์ D",       icon:"👨‍🏫" },
+      { id:"f9-jk",         name:"ห้องประชุม JK Commons",  icon:"🎤" },
+      { id:"f9-relax",      name:"พื้นที่พักผ่อน",          icon:"🌿" },
+      { id:"f9-faculty-e",  name:"ห้องพักอาจารย์ E",       icon:"👨‍🏫" },
+      { id:"f9-faculty-f1", name:"ห้องพักอาจารย์ F1",      icon:"👨‍🏫" },
+      { id:"f9-faculty-f2", name:"ห้องพักอาจารย์ F2",      icon:"👨‍🏫" },
+      { id:"f9-cowork",     name:"Co-working Space 2",      icon:"🖥️" },
+      { id:"f9-toilet-f",   name:"ห้องน้ำ (F)",             icon:"🚹🚺" },
+    ]
+  },
+  8: {
+    label: "ชั้น 8",
+    rooms: [
+      { id:"f8-lift",      name:"ลิฟท์",               icon:"🔼" },
+      { id:"f8-stairs",    name:"บันได",               icon:"🪜" },
+      { id:"f8-maid",      name:"ห้องพักแม่บ้าน",      icon:"🧹" },
+      { id:"f8-faculty",   name:"ห้องพักอาจารย์",      icon:"👨‍🏫" },
+      { id:"f8-secretary", name:"ห้องเลขาภาควิชา",    icon:"📋" },
+      { id:"f8-head",      name:"ห้องหัวหน้าภาค",     icon:"🏅" },
+      { id:"f8-dining",    name:"ห้องกินข้าว",         icon:"🍱" },
+      { id:"f8-cowork",    name:"Co-working Space 1",  icon:"💻" },
+      { id:"f8-meeting",   name:"ห้องประชุมชั้น 8",    icon:"🏛️" },
+      { id:"f8-fitness",   name:"ห้องฟิตเนส",          icon:"🏋️" },
+      { id:"f8-studio",    name:"ห้อง Studio",         icon:"🎬" },
+    ]
+  }
+};
+
+function getBaseURL() {
+  const inp = document.getElementById('base-url-input').value.trim();
+  if (inp) return inp.replace(/\/?$/, '/');
+  // ดึงจาก URL ปัจจุบัน แทนที่ qr-print.html ด้วย index.html
+  return window.location.href.replace(/qr-print\.html.*$/, '');
+}
+
+function rebuild() {
+  const content = document.getElementById('content');
+  content.innerHTML = '';
+  const base = getBaseURL();
+
+  Object.entries(BUILDING_FLOORS).forEach(([fNum, fl]) => {
+    const section = document.createElement('div');
+    section.className = 'floor-section';
+    const title = document.createElement('div');
+    title.className = 'floor-title';
+    title.textContent = '🏢 อาคารตระหนักจิตร — ' + fl.label;
+    section.appendChild(title);
+
+    const grid = document.createElement('div');
+    grid.className = 'grid';
+
+    fl.rooms.forEach(room => {
+      const card = document.createElement('div');
+      card.className = 'card';
+
+      const qbox = document.createElement('div');
+      qbox.className = 'qr-box';
+      card.appendChild(qbox);
+
+      const icon = document.createElement('div');
+      icon.className = 'room-icon';
+      icon.textContent = room.icon;
+      card.appendChild(icon);
+
+      const name = document.createElement('div');
+      name.className = 'room-name';
+      name.textContent = room.name;
+      card.appendChild(name);
+
+      const floor = document.createElement('div');
+      floor.className = 'room-floor';
+      floor.textContent = fl.label + ' • อาคารตระหนักจิตร';
+      card.appendChild(floor);
+
+      const rid = document.createElement('div');
+      rid.className = 'room-id';
+      rid.textContent = room.id;
+      card.appendChild(rid);
+
+      grid.appendChild(card);
+
+      try {
+        new QRCode(qbox, {
+          text: base + '?here=' + room.id,
+          width: 130, height: 130,
+          colorDark: '#000', colorLight: '#fff',
+          correctLevel: QRCode.CorrectLevel.M
+        });
+      } catch(e) {}
+    });
+
+    section.appendChild(grid);
+    content.appendChild(section);
+  });
+}
+
+// ตั้งค่า base URL เริ่มต้น
+window.addEventListener('DOMContentLoaded', () => {
+  const base = window.location.href.replace(/qr-print\.html.*$/, '');
+  document.getElementById('base-url-input').value = base;
+  rebuild();
+});
+</script>
+</body>
+</html>
