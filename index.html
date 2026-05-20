@@ -900,18 +900,27 @@ Object.assign(ROOM_COORDS,{
 let calCoords={}, calGpsReady=false, calLat=null, calLng=null, calAcc=null;
 try{ const s=localStorage.getItem('tmhg_coords'); if(s){calCoords=JSON.parse(s); Object.assign(ROOM_COORDS,calCoords);} }catch(e){}
 
-navigator.geolocation&&navigator.geolocation.watchPosition(
-  p=>{ calLat=p.coords.latitude; calLng=p.coords.longitude; calAcc=Math.round(p.coords.accuracy);
-    calGpsReady=true; userLat=calLat; userLng=calLng;
-    const dot=document.getElementById('cal-dot'), txt=document.getElementById('cal-gps-txt'), btn=document.getElementById('cal-save');
-    if(dot) dot.className='cal-dot ready';
-    if(txt) txt.textContent=`GPS พร้อม ±${calAcc} ม.`;
-    if(btn) btn.disabled=false;
-    updateDestDist();
-  },
-  ()=>{ const t=document.getElementById('cal-gps-txt'); if(t) t.textContent='ไม่พบ GPS — เปิด Location'; },
-  {enableHighAccuracy:true,maximumAge:1000}
-);
+function setGpsMsg(msg){ const t=document.getElementById('cal-gps-txt'); if(t) t.textContent=msg; }
+function setGpsErr(err){
+  const msgs={1:'GPS ถูก Block — กด 🔒 หน้า URL แล้ว Allow Location',2:'ไม่พบสัญญาณ GPS — ออกไปที่โล่งแจ้ง',3:'GPS timeout — ลองใหม่อีกครั้ง'};
+  setGpsMsg(msgs[err.code]||'GPS ไม่พร้อม — เปิด Location ใน Settings');
+  document.getElementById('nav-hint').textContent = msgs[err.code]||'GPS ไม่พร้อม';
+}
+if(!navigator.geolocation){ setGpsMsg('เบราว์เซอร์นี้ไม่รองรับ GPS'); }
+else {
+  navigator.geolocation.watchPosition(
+    p=>{ calLat=p.coords.latitude; calLng=p.coords.longitude; calAcc=Math.round(p.coords.accuracy);
+      calGpsReady=true; userLat=calLat; userLng=calLng;
+      const dot=document.getElementById('cal-dot'), btn=document.getElementById('cal-save');
+      if(dot) dot.className='cal-dot ready';
+      setGpsMsg(`GPS พร้อม ±${calAcc} ม.`);
+      if(btn) btn.disabled=false;
+      updateDestDist();
+    },
+    setGpsErr,
+    {enableHighAccuracy:true,maximumAge:1000,timeout:15000}
+  );
+}
 
 function buildCalSelect(){
   const sel=document.getElementById('cal-select'); if(!sel) return;
