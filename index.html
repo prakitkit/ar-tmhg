@@ -506,8 +506,7 @@ const FLOOR_MAPS = {
 
 
 <!-- ประตูแนวตั้ง col②.5 ในทางเดินหลัก h=44 -->
-<rect x="258" y="171" width="16" height="44" fill="#0a3a0a" stroke="#22c55e" stroke-width="2"/>
-<text x="266" y="193" text-anchor="middle" transform="rotate(-90,266,193)" style="font-size:7px;fill:#22c55e;font-weight:600">🚪 ประตู</text>
+<g class="room" data-id="f9-door2"><rect x="258" y="171" width="16" height="44" fill="#0a3a0a" stroke="#22c55e" stroke-width="2"/><text x="266" y="193" text-anchor="middle" transform="rotate(-90,266,193)" style="font-size:7px;fill:#22c55e;font-weight:600">🚪 ประตู</text></g>
 
 <!-- ══ ROW C ══ -->
 <g class="room" data-id="f9-faculty-c1"><rect x="50" y="302" width="72" height="63" fill="#0a2a0a" stroke="#16a34a" stroke-width="0.8"/><text x="86" y="333" text-anchor="middle" class="lbl th">👨‍🏫 ห้องพัก อ.1</text></g>
@@ -516,12 +515,12 @@ const FLOOR_MAPS = {
 <g class="room" data-id="f9-faculty-c3"><rect x="446" y="302" width="108" height="63" fill="#0a2a0a" stroke="#16a34a" stroke-width="0.8"/><text x="500" y="333" text-anchor="middle" class="lbl th">👨‍🏫 ห้องพัก อ.</text></g>
 <g class="room" data-id="f9-faculty-c4"><rect x="581" y="302" width="81" height="63" fill="#0a2a0a" stroke="#16a34a" stroke-width="0.8"/><text x="621" y="333" text-anchor="middle" class="lbl th">👨‍🏫 ห้องพัก อ.</text></g>
 
-<g class="room" data-id="f9-relax"><rect x="122" y="365" width="72" height="198" fill="#0a2a0a" stroke="#16a34a" stroke-width="0.8"/><text x="158" y="445" text-anchor="middle" class="lbl th">🌿</text><text x="158" y="465" text-anchor="middle" class="lbl ts">พักผ่อน</text></g>
+<rect x="122" y="365" width="72" height="198" fill="#0a2a0a" stroke="#16a34a" stroke-width="0.5" stroke-dasharray="3 3" opacity="0.4"/>
 
 <!-- ══ ROW D ══ -->
 <g class="room" data-id="f9-faculty-d"><rect x="50"  y="365" width="72" height="99" fill="#0a2a0a" stroke="#16a34a" stroke-width="0.8"/><text x="86"  y="400" text-anchor="middle" class="lbl th">👨‍🏫</text><text x="86"  y="418" text-anchor="middle" class="lbl ts">ห้องพัก อ.D</text></g>
 <g class="room" data-id="f9-jk"><rect x="266" y="365" width="180" height="198" fill="#1a0a2a" stroke="#7c3aed" stroke-width="0.8"/><text x="356" y="445" text-anchor="middle" class="lbl th">🎤</text><text x="356" y="465" text-anchor="middle" class="lbl th">JK Commons</text><text x="356" y="483" text-anchor="middle" class="lbl ts">25–40 คน</text></g>
-<g class="room"><rect x="446" y="365" width="38" height="238" fill="#0a2a0a" stroke="#16a34a" stroke-width="0.8"/><text x="465" y="460" text-anchor="middle" class="lbl th">🌿</text><text x="465" y="480" text-anchor="middle" class="lbl ts" style="font-size:8px">พักผ่อน</text></g>
+<g class="room" data-id="f9-relax"><rect x="446" y="365" width="38" height="238" fill="#0a2a0a" stroke="#16a34a" stroke-width="0.8"/><text x="465" y="460" text-anchor="middle" class="lbl th">🌿</text><text x="465" y="480" text-anchor="middle" class="lbl ts" style="font-size:8px">พักผ่อน</text></g>
 
 <!-- ══ ROW E ══ -->
 <g class="room" data-id="f9-faculty-e"><rect x="50"  y="464" width="72" height="99" fill="#0a2a0a" stroke="#16a34a" stroke-width="0.8"/><text x="86"  y="500" text-anchor="middle" class="lbl th">👨‍🏫</text><text x="86"  y="518" text-anchor="middle" class="lbl ts">ห้องพัก อ.E</text></g>
@@ -828,6 +827,7 @@ const ROOM_COORDS = {
   "f9-fire":       { lat:13.7955, lng:100.4303, name:"บันไดหนีไฟ",           icon:"🚨" },
   "f9-stairs":     { lat:13.7953, lng:100.4299, name:"บันไดในอาคาร",         icon:"🪜" },
   "f9-door1":      { lat:13.7954, lng:100.4300, name:"ประตูทางเข้า 1",       icon:"🚪" },
+  "f9-door2":      { lat:13.7954, lng:100.4300, name:"ประตูทางเข้า 2",       icon:"🚪" },
   "f9-staff-b":    { lat:13.7954, lng:100.4301, name:"ห้องเจ้าหน้าที่ B",   icon:"👥" },
   "f9-student":    { lat:13.7954, lng:100.4302, name:"ห้องพักนักศึกษา",      icon:"🎓" },
   "f9-toilet-b":   { lat:13.7955, lng:100.4303, name:"ห้องน้ำ B",            icon:"🚹🚺" },
