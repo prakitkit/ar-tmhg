@@ -347,6 +347,12 @@ const MARKER_MAP = {
     <button class="ftab" onclick="switchFloor(8)" id="tab-8" style="display:none">ชั้น 8</button>
     <button class="ftab active" onclick="switchFloor(9)" id="tab-9">ชั้น 9</button>
   </div>
+  <div id="here-bar" style="display:none;align-items:center;gap:8px;background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.3);border-radius:10px;padding:8px 12px;margin-bottom:10px;font-size:12px;">
+    <span style="color:#fbbf24">📍</span>
+    <span style="color:rgba(255,255,255,0.45)">คุณอยู่ที่:</span>
+    <span id="here-room-name" style="color:#fbbf24;font-weight:700;flex:1">—</span>
+    <button onclick="clearHere()" style="background:none;border:none;color:rgba(255,255,255,0.3);font-size:16px;cursor:pointer;padding:0;line-height:1">✕</button>
+  </div>
   <div class="fmap-wrap">
     <div class="fmap-inner" id="fmap-inner"><svg id="floor-svg" viewBox="0 0 340 230" xmlns="http://www.w3.org/2000/svg"></svg></div>
   </div>
@@ -653,8 +659,9 @@ function renderFloorMap(f) {
       showRoom(id);
     });
   });
-  // re-place pin if a dest is already selected on this floor
   if (destRoom) placePin(destRoom.id);
+  if (hereRoom) placeHerePin(hereRoom.id);
+  drawPathLine();
 }
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -720,6 +727,87 @@ function placePin(id) {
   svg.appendChild(pin);
 }
 
+function placeHerePin(id) {
+  const svg = document.getElementById('floor-svg');
+  const old = document.getElementById('map-here-pin');
+  if (old) old.remove();
+  if (!id || !svg) return;
+  const g = svg.querySelector(`[data-id="${id}"]`);
+  if (!g) return;
+  const rect = g.querySelector('rect');
+  if (!rect) return;
+  const cx = parseFloat(rect.getAttribute('x')) + parseFloat(rect.getAttribute('width')) / 2;
+  const cy = parseFloat(rect.getAttribute('y')) + parseFloat(rect.getAttribute('height')) / 2;
+  const pin = document.createElementNS(SVG_NS, 'g');
+  pin.id = 'map-here-pin';
+  const pulse = document.createElementNS(SVG_NS, 'circle');
+  pulse.setAttribute('cx', cx); pulse.setAttribute('cy', cy); pulse.setAttribute('r', 12);
+  pulse.setAttribute('fill', 'rgba(251,191,36,0.18)'); pulse.setAttribute('stroke', '#fbbf24'); pulse.setAttribute('stroke-width', '1.5');
+  const aR = document.createElementNS(SVG_NS, 'animate');
+  aR.setAttribute('attributeName', 'r'); aR.setAttribute('values', '10;18;10'); aR.setAttribute('dur', '1.4s'); aR.setAttribute('repeatCount', 'indefinite');
+  const aO = document.createElementNS(SVG_NS, 'animate');
+  aO.setAttribute('attributeName', 'opacity'); aO.setAttribute('values', '0.9;0.2;0.9'); aO.setAttribute('dur', '1.4s'); aO.setAttribute('repeatCount', 'indefinite');
+  pulse.appendChild(aR); pulse.appendChild(aO);
+  const dot = document.createElementNS(SVG_NS, 'circle');
+  dot.setAttribute('cx', cx); dot.setAttribute('cy', cy); dot.setAttribute('r', 5); dot.setAttribute('fill', '#fbbf24');
+  const lbl = document.createElementNS(SVG_NS, 'text');
+  lbl.setAttribute('x', cx); lbl.setAttribute('y', cy + 22);
+  lbl.setAttribute('text-anchor', 'middle'); lbl.setAttribute('font-size', '7');
+  lbl.setAttribute('fill', '#fbbf24'); lbl.setAttribute('font-weight', '700'); lbl.textContent = '📍 ที่นี่';
+  pin.appendChild(pulse); pin.appendChild(dot); pin.appendChild(lbl);
+  svg.appendChild(pin);
+}
+
+function drawPathLine() {
+  const svg = document.getElementById('floor-svg');
+  const old = document.getElementById('map-path-line');
+  if (old) old.remove();
+  if (!hereRoom || !destRoom || !svg || hereRoom.id === destRoom.id) return;
+  const hg = svg.querySelector(`[data-id="${hereRoom.id}"]`);
+  const dg = svg.querySelector(`[data-id="${destRoom.id}"]`);
+  if (!hg || !dg) return;
+  const ctr = g => { const r = g.querySelector('rect'); if(!r) return null; return { x: parseFloat(r.getAttribute('x'))+parseFloat(r.getAttribute('width'))/2, y: parseFloat(r.getAttribute('y'))+parseFloat(r.getAttribute('height'))/2 }; };
+  const hc = ctr(hg), dc = ctr(dg);
+  if (!hc || !dc) return;
+  const line = document.createElementNS(SVG_NS, 'line');
+  line.id = 'map-path-line';
+  line.setAttribute('x1', hc.x); line.setAttribute('y1', hc.y);
+  line.setAttribute('x2', dc.x); line.setAttribute('y2', dc.y);
+  line.setAttribute('stroke', '#fbbf24'); line.setAttribute('stroke-width', '2');
+  line.setAttribute('stroke-dasharray', '8 5'); line.setAttribute('opacity', '0.6');
+  svg.insertBefore(line, svg.firstChild);
+}
+
+function updateHereBar() {
+  const bar = document.getElementById('here-bar');
+  const nm = document.getElementById('here-room-name');
+  if (!bar || !nm) return;
+  if (hereRoom) { bar.style.display = 'flex'; nm.textContent = hereRoom.icon + ' ' + hereRoom.name; }
+  else { bar.style.display = 'none'; }
+}
+
+function clearHere() {
+  hereRoom = null;
+  updateHereBar();
+  const svg = document.getElementById('floor-svg');
+  const p = document.getElementById('map-here-pin'); if(p) p.remove();
+  const l = document.getElementById('map-path-line'); if(l) l.remove();
+}
+
+function setHere(id) {
+  const room = findRoom(id);
+  if (!room) return;
+  hereRoom = { id, ...room };
+  for (const [fNum, fl] of Object.entries(BUILDING.floors)) {
+    if (fl.rooms.find(r => r.id === id)) { currentFloor = parseInt(fNum); break; }
+  }
+  updateHereBar();
+  document.querySelectorAll('.ftab').forEach(t => t.classList.remove('active'));
+  const tab = document.getElementById('tab-' + currentFloor);
+  if (tab) { tab.style.display = ''; tab.classList.add('active'); }
+  renderFloorMap(currentFloor); renderRoomList(currentFloor);
+}
+
 function renderRoomList(f) {
   const container = document.getElementById('room-list');
   container.innerHTML = '';
@@ -748,31 +836,36 @@ function closeQR() { document.getElementById('qr-panel').style.display = 'none';
 
 function buildQRGrid() {
   const grid = document.getElementById('qr-grid');
-  if (grid.children.length > 0) return;
-  Object.entries(MARKER_MAP).forEach(([marker, roomId]) => {
-    const room = findRoom(roomId);
-    if (!room) return;
-    const card = document.createElement('div');
-    card.className = 'qcard';
-    const qd = document.createElement('div');
-    qd.style.cssText = 'width:86px;height:86px';
-    card.appendChild(qd);
-    const nm = document.createElement('div'); nm.className = 'qname';
-    nm.textContent = room.icon + ' ' + room.name; card.appendChild(nm);
-    const fl = document.createElement('div'); fl.className = 'qfl';
-    fl.textContent = room.floorLabel + ' • ' + marker; card.appendChild(fl);
-    grid.appendChild(card);
-    try {
-      new QRCode(qd, {
-        text: 'https://tropicalhygiene.mahidol.ac.th/ar/' + roomId,
-        width: 86, height: 86, colorDark: '#000', colorLight: '#fff',
-        correctLevel: QRCode.CorrectLevel.M
-      });
-    } catch(e) {}
+  grid.innerHTML = '';
+  const base = window.location.href.split('?')[0];
+  Object.entries(BUILDING.floors).forEach(([fNum, fl]) => {
+    const hdr = document.createElement('div');
+    hdr.style.cssText = 'grid-column:1/-1;font-size:12px;font-weight:700;color:#00ffe7;margin-top:8px;padding:6px 0 4px;border-bottom:1px solid rgba(0,255,231,0.2);';
+    hdr.textContent = fl.label;
+    grid.appendChild(hdr);
+    fl.rooms.forEach(room => {
+      const card = document.createElement('div');
+      card.className = 'qcard';
+      const qd = document.createElement('div');
+      qd.style.cssText = 'width:86px;height:86px';
+      card.appendChild(qd);
+      const nm = document.createElement('div'); nm.className = 'qname';
+      nm.textContent = room.icon + ' ' + room.name; card.appendChild(nm);
+      const fl2 = document.createElement('div'); fl2.className = 'qfl';
+      fl2.textContent = fl.label; card.appendChild(fl2);
+      grid.appendChild(card);
+      try {
+        new QRCode(qd, {
+          text: base + '?here=' + room.id,
+          width: 86, height: 86, colorDark: '#000', colorLight: '#fff',
+          correctLevel: QRCode.CorrectLevel.M
+        });
+      } catch(e) {}
+    });
   });
   const note = document.createElement('div');
-  note.style.cssText = 'grid-column:1/-1;font-size:10px;color:rgba(255,255,255,0.28);line-height:1.7;margin-top:6px;padding:10px;background:rgba(255,255,255,0.025);border-radius:8px;';
-  note.textContent = 'ดาวน์โหลด Hiro/Kanji/Letter marker จาก ar-js-org.github.io/AR.js เพื่อพิมพ์ติดหน้าห้อง';
+  note.style.cssText = 'grid-column:1/-1;font-size:10px;color:rgba(255,255,255,0.28);line-height:1.8;margin-top:10px;padding:10px;background:rgba(255,255,255,0.025);border-radius:8px;';
+  note.textContent = 'พิมพ์ QR ติดหน้าแต่ละห้อง • ผู้เยี่ยมชม scan ด้วยกล้องปกติ → แอปรู้จุดปัจจุบันทันที';
   grid.appendChild(note);
 }
 </script>
@@ -847,7 +940,7 @@ const ROOM_COORDS = {
   "f9-toilet-f":   { lat:13.7950, lng:100.4302, name:"ห้องน้ำ F",            icon:"🚹🚺" },
 };
 // โหลดพิกัดที่บันทึกไว้ (ถ้ามี)
-let destRoom=null, userLat=null, userLng=null;
+let destRoom=null, userLat=null, userLng=null, hereRoom=null;
 
 function haversine(la1,lo1,la2,lo2){
   const R=6371000,dl=(la2-la1)*Math.PI/180,dg=(lo2-lo1)*Math.PI/180;
@@ -1038,6 +1131,22 @@ function drawNav(){
   ctx.beginPath(); ctx.arc(cx,cy,55+p*35,0,Math.PI*2);
   ctx.strokeStyle=`rgba(0,255,231,${0.45-p*0.45})`; ctx.lineWidth=2; ctx.stroke();
 }
+
+// ── QR WAYPOINT: อ่าน ?here= จาก URL ──
+function initFromURL() {
+  const params = new URLSearchParams(window.location.search);
+  const hereId = params.get('here');
+  if (!hereId) return;
+  const room = findRoom(hereId);
+  if (!room) return;
+  // ข้าม perm screen ไปเลย — user มาจาก QR scan ไม่ต้องใช้ AR camera
+  document.getElementById('perm-screen').style.display = 'none';
+  document.getElementById('hud').style.display = 'block';
+  startGPS();
+  setHere(hereId);
+  openMap();
+}
+document.addEventListener('DOMContentLoaded', initFromURL);
 </script>
 </body>
 </html>
