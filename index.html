@@ -758,24 +758,99 @@ function placeHerePin(id) {
   svg.appendChild(pin);
 }
 
+// ── CORRIDOR GRAPH — ชั้น 9 ──
+const F9_NODES = {
+  'c-top':  {x:230, y:55},   // ปากโถงบน (ใกล้ THOHUN)
+  'c-A':    {x:230, y:140},  // โถง row A
+  'c-junc': {x:230, y:193},  // จุดตัดโถง × ทางเดินหลัก (KEY)
+  'c-C':    {x:230, y:333},  // โถง row C
+  'c-D':    {x:230, y:413},  // โถง row D
+  'c-E':    {x:230, y:513},  // โถง row E
+  'c-F':    {x:230, y:620},  // โถง row F (ล่างสุด)
+  'w-L':    {x:86,  y:193},  // ปลายซ้ายทางเดิน (บันได)
+  'w-M1':   {x:356, y:193},  // กลางทางเดิน (ห้องเจ้าหน้าที่)
+  'w-M2':   {x:500, y:193},  // กลาง-ขวา (นักศึกษา)
+  'w-R':    {x:620, y:193},  // ปลายขวาทางเดิน (ห้องน้ำ/บันไดหนีไฟ)
+  'l-top':  {x:158, y:120},  // ลิฟท์ / โถงเล็ก
+  'l-C':    {x:86,  y:333},  // ซ้าย row C
+};
+const F9_EDGES = [
+  ['c-top','c-A'],['c-A','c-junc'],['c-junc','c-C'],['c-C','c-D'],['c-D','c-E'],['c-E','c-F'],
+  ['c-junc','w-L'],['c-junc','w-M1'],['w-M1','w-M2'],['w-M2','w-R'],
+  ['l-top','c-top'],['l-top','w-L'],
+  ['w-L','l-C'],['l-C','c-C'],
+];
+const F9_ROOM_NODE = {
+  'f9-lift':'l-top','f9-toilet-a':'l-top','f9-storage':'l-top',
+  'f9-thohun':'c-top','f9-maid':'w-R','f9-fire':'w-R',
+  'f9-stairs':'w-L','f9-door1':'c-junc','f9-door2':'c-junc',
+  'f9-staff-b':'w-M1','f9-student':'w-M2','f9-toilet-b':'w-R',
+  'f9-faculty-c1':'l-C','f9-faculty-c2':'l-C',
+  'f9-staff-c':'c-C','f9-faculty-c3':'c-C','f9-faculty-c4':'w-R',
+  'f9-faculty-d':'c-D','f9-jk':'c-D','f9-relax':'c-D',
+  'f9-faculty-e':'c-E',
+  'f9-faculty-f1':'c-F','f9-faculty-f2':'c-F','f9-cowork':'c-F','f9-toilet-f':'c-F',
+};
+
+function bfsPath(from, to, nodes, edges) {
+  if (from === to) return [from];
+  const adj = {};
+  Object.keys(nodes).forEach(n => adj[n] = []);
+  edges.forEach(([a,b]) => { adj[a].push(b); adj[b].push(a); });
+  const queue = [[from]], visited = new Set([from]);
+  while (queue.length) {
+    const path = queue.shift(), node = path[path.length-1];
+    for (const next of adj[node]) {
+      if (!visited.has(next)) {
+        if (next === to) return [...path, next];
+        visited.add(next); queue.push([...path, next]);
+      }
+    }
+  }
+  return null;
+}
+
 function drawPathLine() {
   const svg = document.getElementById('floor-svg');
   const old = document.getElementById('map-path-line');
   if (old) old.remove();
   if (!hereRoom || !destRoom || !svg || hereRoom.id === destRoom.id) return;
-  const hg = svg.querySelector(`[data-id="${hereRoom.id}"]`);
-  const dg = svg.querySelector(`[data-id="${destRoom.id}"]`);
-  if (!hg || !dg) return;
-  const ctr = g => { const r = g.querySelector('rect'); if(!r) return null; return { x: parseFloat(r.getAttribute('x'))+parseFloat(r.getAttribute('width'))/2, y: parseFloat(r.getAttribute('y'))+parseFloat(r.getAttribute('height'))/2 }; };
-  const hc = ctr(hg), dc = ctr(dg);
+
+  const getCtr = id => {
+    const g = svg.querySelector(`[data-id="${id}"]`);
+    if (!g) return null;
+    const r = g.querySelector('rect'); if (!r) return null;
+    return { x: parseFloat(r.getAttribute('x'))+parseFloat(r.getAttribute('width'))/2,
+             y: parseFloat(r.getAttribute('y'))+parseFloat(r.getAttribute('height'))/2 };
+  };
+  const hc = getCtr(hereRoom.id), dc = getCtr(destRoom.id);
   if (!hc || !dc) return;
-  const line = document.createElementNS(SVG_NS, 'line');
-  line.id = 'map-path-line';
-  line.setAttribute('x1', hc.x); line.setAttribute('y1', hc.y);
-  line.setAttribute('x2', dc.x); line.setAttribute('y2', dc.y);
-  line.setAttribute('stroke', '#fbbf24'); line.setAttribute('stroke-width', '2');
-  line.setAttribute('stroke-dasharray', '8 5'); line.setAttribute('opacity', '0.6');
-  svg.insertBefore(line, svg.firstChild);
+
+  // หาเส้นทางผ่าน corridor graph
+  let pts = [hc];
+  const nodes = currentFloor===9 ? F9_NODES : null;
+  const edges = currentFloor===9 ? F9_EDGES : null;
+  const roomNode = currentFloor===9 ? F9_ROOM_NODE : null;
+  if (nodes && roomNode) {
+    const fn = roomNode[hereRoom.id], tn = roomNode[destRoom.id];
+    if (fn && tn) {
+      const cp = bfsPath(fn, tn, nodes, edges);
+      if (cp) cp.forEach(n => pts.push(nodes[n]));
+    }
+  }
+  pts.push(dc);
+
+  const pl = document.createElementNS(SVG_NS, 'polyline');
+  pl.id = 'map-path-line';
+  pl.setAttribute('points', pts.map(p=>`${p.x},${p.y}`).join(' '));
+  pl.setAttribute('fill', 'none');
+  pl.setAttribute('stroke', '#fbbf24');
+  pl.setAttribute('stroke-width', '3');
+  pl.setAttribute('stroke-dasharray', '10 6');
+  pl.setAttribute('stroke-linecap', 'round');
+  pl.setAttribute('stroke-linejoin', 'round');
+  pl.setAttribute('opacity', '0.85');
+  svg.insertBefore(pl, svg.firstChild);
 }
 
 function updateHereBar() {
