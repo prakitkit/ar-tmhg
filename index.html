@@ -541,6 +541,7 @@ function startApp() {
   document.getElementById('ar-scene').style.display = 'block';
   document.getElementById('hud').style.display = 'block';
   buildARMarkers();
+  startGPS();
 }
 
 function buildARMarkers() {
@@ -902,12 +903,16 @@ try{ const s=localStorage.getItem('tmhg_coords'); if(s){calCoords=JSON.parse(s);
 
 function setGpsMsg(msg){ const t=document.getElementById('cal-gps-txt'); if(t) t.textContent=msg; }
 function setGpsErr(err){
-  const msgs={1:'GPS ถูก Block — กด 🔒 หน้า URL แล้ว Allow Location',2:'ไม่พบสัญญาณ GPS — ออกไปที่โล่งแจ้ง',3:'GPS timeout — ลองใหม่อีกครั้ง'};
-  setGpsMsg(msgs[err.code]||'GPS ไม่พร้อม — เปิด Location ใน Settings');
-  document.getElementById('nav-hint').textContent = msgs[err.code]||'GPS ไม่พร้อม';
+  const msgs={1:'GPS ถูก Block — ไป Settings > Safari > Location > Allow',2:'ไม่พบสัญญาณ GPS — ลองออกไปบริเวณโล่ง',3:'GPS timeout — ลองใหม่อีกครั้ง'};
+  const msg=msgs[err.code]||'GPS ไม่พร้อม — เปิด Location ใน Settings';
+  setGpsMsg(msg);
+  const nh=document.getElementById('nav-hint'); if(nh) nh.textContent=msg;
 }
-if(!navigator.geolocation){ setGpsMsg('เบราว์เซอร์นี้ไม่รองรับ GPS'); }
-else {
+let gpsStarted=false;
+function startGPS(){
+  if(gpsStarted) return; gpsStarted=true;
+  if(!navigator.geolocation){ setGpsMsg('เบราว์เซอร์นี้ไม่รองรับ GPS'); return; }
+  setGpsMsg('กำลังหา GPS...');
   navigator.geolocation.watchPosition(
     p=>{ calLat=p.coords.latitude; calLng=p.coords.longitude; calAcc=Math.round(p.coords.accuracy);
       calGpsReady=true; userLat=calLat; userLng=calLng;
@@ -918,7 +923,7 @@ else {
       updateDestDist();
     },
     setGpsErr,
-    {enableHighAccuracy:true,maximumAge:1000,timeout:15000}
+    {enableHighAccuracy:true,maximumAge:0,timeout:20000}
   );
 }
 
